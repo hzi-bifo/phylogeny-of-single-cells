@@ -1,0 +1,23 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+
+description: snakemake configuration file
+
+type: object
+
+properties:
+  samples:
+    type: string
+  units:
+    type: string
+  univec:
+    type: object
+    properties:
+      core:
+        type: boolean
+    required:
+      - core
+
+required:
+  - samples
+  - units
+  - univec
