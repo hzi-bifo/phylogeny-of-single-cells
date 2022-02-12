@@ -70,7 +70,7 @@ def get_final_output():
 
 def get_sample_unit_fastqs(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
-    return [ unit.fq1, unit.fq2]
+    return [ unit.fq1, unit.fq2 ]
 
 
 #### params functions
