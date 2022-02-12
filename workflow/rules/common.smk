@@ -78,9 +78,9 @@ def get_sample_unit_fastqs(wildcards):
 def get_cutadapt_parameters(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
     try:
-        adapters = unit["cutadapt"]
-        if isinstance(adapters, str):
-            return adapters
+        cutadapt = unit["cutadapt"]
+        if isinstance(cutadapt, str):
+            return cutadapt
         return ""
     except KeyError:
         return ""
