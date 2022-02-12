@@ -53,7 +53,7 @@ validate(units, schema="../schemas/units.schema.yaml")
 def get_final_output():
     final_output = []
 
-    for sample, unit in units.index:
+    for sample,unit in units.index:
         final_output.extend(
             expand(
                 "results/trimmed/{s}.{u}.{r}.fastq.gz",
