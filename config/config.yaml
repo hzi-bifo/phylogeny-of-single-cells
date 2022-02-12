@@ -3,4 +3,5 @@ samples: config/samples.tsv
 units: config/units.tsv
 
 univec:
+  activate: True
   core: True
