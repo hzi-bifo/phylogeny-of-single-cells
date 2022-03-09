@@ -61,9 +61,7 @@ def get_final_output():
             )
         )
     
-    final_output.extend(
-        "results/qc/multiqc.html"
-    )
+    final_output.append("results/qc/multiqc.html")
 
     return final_output
 
