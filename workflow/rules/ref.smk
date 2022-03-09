@@ -35,7 +35,7 @@ rule create_full_reference:
         "logs/create_full_reference.log"
     shell:
         "( zcat {input.genome} > {output};"
-        "  cat {input.univec} >> {output}
+        "  cat {input.univec} >> {output} "
         " ) > {log} 2>&1"
 
 
