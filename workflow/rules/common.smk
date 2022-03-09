@@ -50,39 +50,39 @@ validate(units, schema="../schemas/units.schema.yaml")
 
 #### compile wanted workflow outputs
 
+
 def get_final_output():
     final_output = []
 
-    for sample,unit in units.index:
+    for sample, unit in units.index:
         final_output.extend(
             expand(
-                    "results/trimmed/{s}.{u}.{r}.fastq.gz", 
-                s=sample,
-                u=unit,
-                r=["1", "2"]
+                "results/trimmed/{s}.{u}.{r}.fastq.gz", s=sample, u=unit, r=["1", "2"]
             )
         )
-    
+
     return final_output
 
 
 #### input functions
 
+
 def get_sample_unit_fastqs(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
-    return [ unit.fq1, unit.fq2 ]
+    return [unit.fq1, unit.fq2]
+
 
 def get_multiqc_input(wildcards):
     multiqc_input = []
-    for sample,unit in units.index:
+    for sample, unit in units.index:
         unit = units.loc[sample].loc[unit]
         multiqc_input.extend(
             expand(
                 "results/qc/fastqc/{file}",
                 file=[
                     unit.fq1.replace(".fastq.gz", "_fastqc.zip"),
-                    unit.fq2.replace(".fastq.gz", "_fastqc.zip")
-                ]
+                    unit.fq2.replace(".fastq.gz", "_fastqc.zip"),
+                ],
             )
         )
         multiqc_input.extend(
@@ -90,7 +90,7 @@ def get_multiqc_input(wildcards):
                 "results/qc/fastqc/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
                 s=sample,
                 u=unit,
-                r=["1", "2"]
+                r=["1", "2"],
             )
         )
 
@@ -98,6 +98,7 @@ def get_multiqc_input(wildcards):
 
 
 #### params functions
+
 
 def get_cutadapt_parameters(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
