@@ -56,13 +56,13 @@ def get_final_output():
     for sample,unit in units.index:
         final_output.extend(
             expand(
-                "results/trimmed/{s}.{u}.{r}.fastq.gz",
+                    "results/trimmed/{s}.{u}.{r}.fastq.gz", 
                 s=sample,
                 u=unit,
                 r=["1", "2"]
             )
         )
-
+    
     return final_output
 
 
@@ -71,6 +71,30 @@ def get_final_output():
 def get_sample_unit_fastqs(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
     return [ unit.fq1, unit.fq2 ]
+
+def get_multiqc_input(wildcards):
+    multiqc_input = []
+    for sample,unit in units.index:
+        unit = units.loc[sample].loc[unit]
+        multiqc_input.extend(
+            expand(
+                "results/qc/fastqc/{file}",
+                file=[
+                    unit.fq1.replace(".fastq.gz", "_fastqc.zip"),
+                    unit.fq2.replace(".fastq.gz", "_fastqc.zip")
+                ]
+            )
+        )
+        multiqc_input.extend(
+            expand(
+                "results/qc/fastqc/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
+                s=sample,
+                u=unit,
+                r=["1", "2"]
+            )
+        )
+
+    return multiqc_input
 
 
 #### params functions
