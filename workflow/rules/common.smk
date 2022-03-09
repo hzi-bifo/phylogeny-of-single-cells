@@ -77,13 +77,13 @@ def get_sample_unit_fastqs(wildcards):
 def get_multiqc_input(wildcards):
     multiqc_input = []
     for sample, unit in units.index:
-        unit = units.loc[sample].loc[unit]
+        row = units.loc[sample].loc[unit]
         multiqc_input.extend(
             expand(
                 "results/qc/fastqc/{file}",
                 file=[
-                    unit.fq1.replace(".fastq.gz", "_fastqc.zip"),
-                    unit.fq2.replace(".fastq.gz", "_fastqc.zip"),
+                    row.fq1.replace(".fastq.gz", "_fastqc.zip"),
+                    row.fq2.replace(".fastq.gz", "_fastqc.zip"),
                 ],
             )
         )
