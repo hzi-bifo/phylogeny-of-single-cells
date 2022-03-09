@@ -62,6 +62,7 @@ def get_final_output():
         )
     
     final_output.append("results/qc/multiqc.html")
+    final_output.append("resources/reference/full_reference.pac")
 
     return final_output
 
@@ -72,6 +73,14 @@ def get_final_output():
 def get_sample_unit_fastqs(wildcards):
     unit = units.loc[wildcards.sample].loc[wildcards.unit]
     return [unit.fq1, unit.fq2]
+
+
+def get_univec_reference_input(wildcards):
+    if config["univec"]["activate"]:
+        core = "_Core" if config["univec"]["core"] else ""
+        return f"resources/reference/UniVec_Core/UniVec{core}.fa"
+    else:
+        return "/dev/null"
 
 
 def get_multiqc_input(wildcards):
