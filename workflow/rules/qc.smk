@@ -17,7 +17,7 @@ rule multiqc:
     input:
         get_multiqc_input,
     output:
-        "qc/multiqc.html",
+        "results/qc/multiqc.html",
     params:
         "",  # Optional: extra parameters for multiqc.
     log:

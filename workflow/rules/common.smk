@@ -60,6 +60,10 @@ def get_final_output():
                 "results/trimmed/{s}.{u}.{r}.fastq.gz", s=sample, u=unit, r=["1", "2"]
             )
         )
+    
+    final_output.extend(
+        "results/qc/multiqc.html"
+    )
 
     return final_output
 
