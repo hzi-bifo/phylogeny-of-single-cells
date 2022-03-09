@@ -89,7 +89,7 @@ def get_multiqc_input(wildcards):
         )
         multiqc_input.extend(
             expand(
-                "results/qc/fastqc/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
+                "results/qc/fastqc/results/trimmed/{s}.{u}.{r}_fastqc.zip",
                 s=sample,
                 u=unit,
                 r=["1", "2"],
