@@ -60,7 +60,7 @@ def get_final_output():
                 "results/trimmed/{s}.{u}.{r}.fastq.gz", s=sample, u=unit, r=["1", "2"]
             )
         )
-    
+
     final_output.append("results/qc/multiqc.html")
     final_output.append("resources/reference/full_reference.pac")
 

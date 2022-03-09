@@ -30,9 +30,9 @@ rule create_full_reference:
         genome=rules.download_genome.output,
         univec=get_univec_reference_input,
     output:
-        "resources/reference/full_reference.fa"
+        "resources/reference/full_reference.fa",
     log:
-        "logs/create_full_reference.log"
+        "logs/create_full_reference.log",
     shell:
         "( zcat {input.genome} > {output};"
         "  cat {input.univec} >> {output} "
