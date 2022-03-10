@@ -14,6 +14,7 @@ include: "rules/common.smk"
 include: "rules/trimming.smk"
 include: "rules/qc.smk"
 include: "rules/ref.smk"
+include: "rules/mapping.smk"
 
 
 rule all:

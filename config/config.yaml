@@ -2,6 +2,23 @@ samples: config/samples.tsv
 
 units: config/units.tsv
 
+# currently only used for downloading known variation for BQSR,
+# please ensure that this matches the genome downloaded in rule download_genome
+ref:
+  # Ensembl species name
+  species: homo_sapiens
+  # Ensembl release
+  release: 105
+  # Genome build
+  build: GRCh38
+
 univec:
   activate: True
   core: True
+
+picard:
+  markduplicates: "VALIDATION_STRINGENCY=LENIENT"
+
+gatk:
+  baserecalibrator: ""
+  applybqsr: ""

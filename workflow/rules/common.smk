@@ -54,13 +54,8 @@ validate(units, schema="../schemas/units.schema.yaml")
 def get_final_output():
     final_output = []
 
-    for sample, unit in units.index:
-        final_output.extend(
-            expand(
-                "results/trimmed/{s}.{u}.{r}.fastq.gz", s=sample, u=unit, r=["1", "2"]
-            )
-        )
-
+    for sample in samples.index:
+        final_output.append(f"results/recal/{sample}.sorted.bam")
     final_output.append("results/qc/multiqc.html")
     final_output.append("resources/reference/full_reference.pac")
 
@@ -108,6 +103,15 @@ def get_multiqc_input(wildcards):
     return multiqc_input
 
 
+def get_processed_consensus_input(wildcards):
+    if wildcards.read_type == "se":
+        return "results/consensus/fastq/{}.se.fq".format(wildcards.sample)
+    return [
+        "results/consensus/fastq/{}.1.fq".format(wildcards.sample),
+        "results/consensus/fastq/{}.2.fq".format(wildcards.sample),
+    ]
+
+
 #### params functions
 
 
@@ -120,3 +124,10 @@ def get_cutadapt_parameters(wildcards):
         return ""
     except KeyError:
         return ""
+
+
+def get_read_group(wildcards):
+    """Denote sample name and platform in read group."""
+    return r"-R '@RG\tID:{sample}\tSM:{sample}\tPL:{platform}'".format(
+        sample=wildcards.sample, platform=samples.loc[wildcards.sample, "platform"]
+    )

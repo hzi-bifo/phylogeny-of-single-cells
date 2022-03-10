@@ -1,6 +1,6 @@
 rule download_univec:
     output:
-        fasta="resources/reference/UniVec{core}/UniVec{core}.fa",
+        temp(fasta="resources/reference/UniVec{core}/UniVec{core}.fa"),
         uv="resources/reference/UniVec{core}/README.uv",
         origins="resources/reference/UniVec{core}/README.vector.origins",
     log:
@@ -15,7 +15,7 @@ rule download_univec:
 
 rule download_genome:
     output:
-        "resources/reference/genome.fa.gz",
+        temp("resources/reference/genome.fa.gz"),
     log:
         "logs/download_genome.log",
     conda:
@@ -57,3 +57,75 @@ rule bwa_index:
         algorithm="bwtsw",
     wrapper:
         "v1.2.0/bio/bwa/index"
+
+
+rule full_reference_dict:
+    input:
+        "resources/reference/full_reference.fa",
+    output:
+        "resources/reference/full_reference.dict",
+    log:
+        "logs/samtools/full_reference_dict.log",
+    conda:
+        "../envs/samtools.yaml"
+    cache: True
+    shell:
+        "samtools dict {input} > {output} 2> {log} "
+
+
+rule full_reference_faidx:
+    input:
+        "resources/reference/full_reference.fa",
+    output:
+        "resources/reference/full_reference.fa.fai",
+    log:
+        "logs/samtools/full_reference_faidx.log",
+    cache: True
+    wrapper:
+        "v1.2.0/bio/samtools/faidx"
+
+
+rule get_known_variants:
+    input:
+        # use fai to annotate contig lengths for GATK BQSR
+        fai="resources/reference/full_reference.fa.fai",
+    output:
+        vcf="resources/variation.vcf.gz",
+    log:
+        "logs/ensembl/get_known_variants.log",
+    params:
+        species=config["ref"]["species"],
+        release=config["ref"]["release"],
+        build=config["ref"]["build"],
+        type="all",
+    cache: True
+    wrapper:
+        "v1.2.0/bio/reference/ensembl-variation"
+
+
+rule remove_iupac_codes:
+    input:
+        "resources/variation.vcf.gz",
+    output:
+        "resources/variation.noiupac.vcf.gz",
+    log:
+        "logs/rbt/remove_iupac_codes.log",
+    conda:
+        "../envs/rbt.yaml"
+    cache: True
+    shell:
+        "(rbt vcf-fix-iupac-alleles < {input} | bcftools view -Oz > {output}) 2> {log}"
+
+
+rule tabix_variation_noiupac:
+    input:
+        "resources/variation.noiupac.vcf.gz",
+    output:
+        "resources/variation.noiupac.vcf.gz.tbi",
+    log:
+        "logs/tabix/variation.noiupac.vcf.gz.log",
+    params:
+        "-p vcf",
+    cache: True
+    wrapper:
+        "v1.2.0/bio/tabix"
