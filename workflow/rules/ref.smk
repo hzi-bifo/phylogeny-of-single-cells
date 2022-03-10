@@ -1,6 +1,6 @@
 rule download_univec:
     output:
-        temp(fasta="resources/reference/UniVec{core}/UniVec{core}.fa"),
+        fasta=temp("resources/reference/UniVec{core}/UniVec{core}.fa"),
         uv="resources/reference/UniVec{core}/README.uv",
         origins="resources/reference/UniVec{core}/README.vector.origins",
     log:
