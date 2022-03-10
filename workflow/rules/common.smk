@@ -103,6 +103,15 @@ def get_multiqc_input(wildcards):
     return multiqc_input
 
 
+def get_merge_fastqs_input(wc):
+    return expand(
+        "results/trimmed/{sample}.{unit}.{read}.fastq.gz",
+        sample=wc.sample,
+        unit=units.loc[wc.sample, "unit_name"],
+        read=wc.read,
+    )
+
+
 def get_processed_consensus_input(wildcards):
     if wildcards.read_type == "se":
         return "results/consensus/fastq/{}.se.fq".format(wildcards.sample)

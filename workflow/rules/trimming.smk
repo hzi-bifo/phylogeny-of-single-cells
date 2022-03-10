@@ -17,10 +17,7 @@ rule cutadapt:
 
 rule merge_fastqs:
     input:
-        expand(
-            "results/trimmed/{{sample}}.{unit}.{{read}}.fastq.gz",
-            unit=lambda wc: units.loc[wc.sample, "unit_name"],
-        ),
+        get_merge_fastqs_input,
     output:
         temp("results/merged/{sample}.{read}.fastq.gz"),
     log:
