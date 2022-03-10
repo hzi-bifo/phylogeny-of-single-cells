@@ -1,9 +1,6 @@
 rule map_reads:
     input:
-        reads=expand(
-            "results/trimmed/{{sample}}.{read}.fastq.gz",
-            read=["1", "2"]
-        ),
+        reads=expand("results/trimmed/{{sample}}.{read}.fastq.gz", read=["1", "2"]),
         idx=rules.bwa_index.output,
     output:
         temp("results/mapped/{sample}.sorted.bam"),
@@ -20,7 +17,7 @@ rule map_reads:
 
 rule mark_duplicates:
     input:
-        "results/mapped/{sample}.sorted.bam"
+        "results/mapped/{sample}.sorted.bam",
     output:
         bam=temp("results/markdup/{sample}.sorted.bam"),
         metrics="results/qc/markdup/{sample}.metrics.txt",
