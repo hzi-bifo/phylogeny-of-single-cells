@@ -34,7 +34,7 @@ rule create_full_reference:
     log:
         "logs/create_full_reference.log",
     shell:
-        "( zcat {input.genome} > {output};"
+        "( zcat {input.genome} | sed -i -e 's/^>chr/>/' - > {output};"
         "  cat {input.univec} >> {output} "
         " ) > {log} 2>&1"
 
