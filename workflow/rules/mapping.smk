@@ -26,9 +26,8 @@ rule mark_duplicates:
     params:
         extra="{c} {d}".format(
             c=config["picard"]["markduplicates"],
-            d="TAG_DUPLICATE_SET_MEMBERS=true",
+            d="--TAG_DUPLICATE_SET_MEMBERS true",
         ),
-        java_opts="-Dpicard.useLegacyParser=false",
     wrapper:
         "v1.2.0/bio/picard/markduplicates"
 

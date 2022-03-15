@@ -17,7 +17,7 @@ univec:
   core: True
 
 picard:
-  markduplicates: "VALIDATION_STRINGENCY=LENIENT"
+  markduplicates: "--VALIDATION_STRINGENCY LENIENT"
 
 gatk:
   baserecalibrator: ""
