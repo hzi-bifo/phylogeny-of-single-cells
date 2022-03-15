@@ -28,6 +28,8 @@ rule mark_duplicates:
             c=config["picard"]["markduplicates"],
             d="--TAG_DUPLICATE_SET_MEMBERS true",
         ),
+    resources:
+        mem_mb=4096
     wrapper:
         "v1.2.0/bio/picard/markduplicates"
 
@@ -122,6 +124,8 @@ rule recalibrate_base_qualities:
     log:
         "logs/gatk/baserecalibrator/{sample}.log",
     threads: 8
+    resources:
+        mem_mb=1024
     wrapper:
         "v1.2.0/bio/gatk/baserecalibratorspark"
 
@@ -142,5 +146,7 @@ rule apply_bqsr:
     params:
         extra=config["gatk"]["applybqsr"],  # optional
         java_opts="",  # optional
+    resources:
+        mem_mb=1024
     wrapper:
         "v1.2.0/bio/gatk/applybqsr"
