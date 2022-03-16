@@ -15,6 +15,8 @@ include: "rules/trimming.smk"
 include: "rules/qc.smk"
 include: "rules/ref.smk"
 include: "rules/mapping.smk"
+include: "rules/regions.smk"
+include: "rules/candidate_calling.smk"
 
 
 rule all:

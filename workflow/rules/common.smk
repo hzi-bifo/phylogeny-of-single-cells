@@ -121,6 +121,10 @@ def get_processed_consensus_input(wildcards):
     ]
 
 
+def get_individual_samples(individual):
+    return samples.loc[samples["individual"] == individual]["sample_name"]
+
+
 #### params functions
 
 

@@ -5,6 +5,9 @@ units: config/units.tsv
 # currently only used for downloading known variation for BQSR,
 # please ensure that this matches the genome downloaded in rule download_genome
 ref:
+  # Number of chromosomes to consider for calling.
+  # The first n entries of the FASTA will be considered.
+  n_chromosomes: 195
   # Ensembl species name
   species: homo_sapiens
   # Ensembl release
@@ -22,3 +25,6 @@ picard:
 gatk:
   baserecalibrator: ""
   applybqsr: ""
+
+freebayes:
+  min_alternate_fraction: 0.005
