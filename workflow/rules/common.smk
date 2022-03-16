@@ -1,4 +1,6 @@
 import pandas as pd
+from os import path
+
 from snakemake.utils import validate
 
 #### validate config (read in in Snakefile)
