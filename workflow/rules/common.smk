@@ -62,10 +62,13 @@ wildcard_constraints:
 def get_final_output():
     final_output = []
 
-    for sample in samples.index:
-        final_output.append(f"results/recal/{sample}.sorted.bam")
+    final_output.extend(
+        expand(
+            "results/candidate-calls/{individual}.freebayes.bcf",
+            individual=pd.unique(samples.individual)
+        )
+    )
     final_output.append("results/qc/multiqc.html")
-    final_output.append("resources/reference/full_reference.pac")
     for sample, unit in units.index:
         row = units.loc[sample].loc[unit]
         final_output.extend(
