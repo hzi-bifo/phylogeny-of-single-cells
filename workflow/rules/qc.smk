@@ -28,7 +28,7 @@ rule multiqc:
         report(
             "results/qc/multiqc.html",
             caption="../report/multiqc.rst",
-            categiry="Quality Control",
+            category="Quality Control",
         ),
     params:
         "",  # Optional: extra parameters for multiqc.
