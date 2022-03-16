@@ -1,23 +1,35 @@
-rule fastqc:
+rule falco:
     input:
         "{path_and_file_name}.fastq.gz",
     output:
-        html="results/qc/fastqc/{path_and_file_name}.html",
-        zip="results/qc/fastqc/{path_and_file_name}_fastqc.zip",  # the suffix _fastqc.zip is necessary for multiqc to find the file. If not using multiqc, you are free to choose an arbitrary filename
+        "results/qc/falco/{path_and_file_name}/fastqc_data.txt",
+        report(
+            "results/qc/falco/{path_and_file_name}/fastqc_report.html",
+            caption="../report/falco.rst",
+            category="Quality Control",
+        ),
+        "results/qc/falco/{path_and_file_name}/summary.txt",
     params:
-        "--quiet",
+        out_dir=lambda wc, output: path.dirname(output[0]),
+    conda:
+        "../envs/falco.yaml"
     log:
-        "logs/fastqc/{path_and_file_name}.log",
-    threads: 1
-    wrapper:
-        "v1.2.0/bio/fastqc"
+        "logs/falco/{path_and_file_name}.log",
+    shell:
+        """
+        ( falco --outdir {params.out_dir} --dir {params.out_dir} {input} ) >{log} 2>&1
+        """
 
 
 rule multiqc:
     input:
         get_multiqc_input,
     output:
-        "results/qc/multiqc.html",
+        report(
+            "results/qc/multiqc.html",
+            caption="../report/multiqc.rst",
+            categiry="Quality Control",
+        ),
     params:
         "",  # Optional: extra parameters for multiqc.
     log:

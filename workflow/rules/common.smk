@@ -58,11 +58,42 @@ def get_final_output():
         final_output.append(f"results/recal/{sample}.sorted.bam")
     final_output.append("results/qc/multiqc.html")
     final_output.append("resources/reference/full_reference.pac")
+    for sample, unit in units.index:
+        row = units.loc[sample].loc[unit]
+        final_output.extend(
+            expand(
+                "results/qc/falco/{file}",
+                file=[
+                    row.fq1.replace(".fastq.gz", "/fastqc_report.html"),
+                    row.fq2.replace(".fastq.gz", "/fastqc_report.html"),
+                ],
+            )
+        )
+        final_output.extend(
+            expand(
+                "results/qc/falco/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
+                s=sample,
+                u=unit,
+                r=["1", "2"],
+            )
+        )
 
     return final_output
 
 
 #### input functions
+
+
+def get_multiqc_input(wildcards):
+    multiqc_input = []
+    multiqc_input.extend(
+        expand(
+            "results/qc/markdup/{sample}.metrics.txt",
+            sample=samples.sample_name
+        )
+    )
+
+    return multiqc_input
 
 
 def get_sample_unit_fastqs(wildcards):
@@ -76,31 +107,6 @@ def get_univec_reference_input(wildcards):
         return f"resources/reference/UniVec_Core/UniVec{core}.fa"
     else:
         return "/dev/null"
-
-
-def get_multiqc_input(wildcards):
-    multiqc_input = []
-    for sample, unit in units.index:
-        row = units.loc[sample].loc[unit]
-        multiqc_input.extend(
-            expand(
-                "results/qc/fastqc/{file}",
-                file=[
-                    row.fq1.replace(".fastq.gz", "_fastqc.zip"),
-                    row.fq2.replace(".fastq.gz", "_fastqc.zip"),
-                ],
-            )
-        )
-        multiqc_input.extend(
-            expand(
-                "results/qc/fastqc/results/trimmed/{s}.{u}.{r}_fastqc.zip",
-                s=sample,
-                u=unit,
-                r=["1", "2"],
-            )
-        )
-
-    return multiqc_input
 
 
 def get_merge_fastqs_input(wc):
