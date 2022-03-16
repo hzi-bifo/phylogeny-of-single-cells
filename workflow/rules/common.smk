@@ -71,25 +71,25 @@ def get_final_output():
         )
     )
     final_output.append("results/qc/multiqc.html")
-    for sample, unit in units.index:
-        row = units.loc[sample].loc[unit]
-        final_output.extend(
-            expand(
-                "results/qc/falco/{file}",
-                file=[
-                    row.fq1.replace(".fastq.gz", "/fastqc_report.html"),
-                    row.fq2.replace(".fastq.gz", "/fastqc_report.html"),
-                ],
-            )
-        )
-        final_output.extend(
-            expand(
-                "results/qc/falco/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
-                s=sample,
-                u=unit,
-                r=["1", "2"],
-            )
-        )
+#    for sample, unit in units.index:
+#        row = units.loc[sample].loc[unit]
+#        final_output.extend(
+#            expand(
+#                "results/qc/falco/{file}",
+#                file=[
+#                    row.fq1.replace(".fastq.gz", "/fastqc_report.html"),
+#                    row.fq2.replace(".fastq.gz", "/fastqc_report.html"),
+#                ],
+#            )
+#        )
+#        final_output.extend(
+#            expand(
+#                "results/qc/falco/results/trimmed/{s}.{u}.{r}/fastqc_report.html",
+#                s=sample,
+#                u=unit,
+#                r=["1", "2"],
+#            )
+#        )
 
     return final_output
 
