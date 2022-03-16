@@ -37,11 +37,10 @@ rule filter_individual_regions:
     output:
         "results/regions/{individual}.covered_regions.filtered.bed",
     params:
-        chroms=config["ref"]["n_chromosomes"],
-        filter_targets=get_filter_targets,
+        chroms=config["ref"].get("n_chromosomes", 25),
     log:
         "logs/regions/{individual}.covered_regions.filtered.log",
     shell:
         "cat {input} | grep -f <(head -n {params.chroms} resources/genome.fasta.fai | "
-        'awk \'{{print "^"$1"\\t"}}\') {params.filter_targets} '
+        'awk \'{{print "^"$1"\\t"}}\') '
         "> {output} 2> {log}"
