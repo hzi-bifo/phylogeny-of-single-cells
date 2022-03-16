@@ -21,7 +21,7 @@ rule freebayes:
         # genotyping is performed by prosolo, hence we deactivate it in freebayes by 
         # always setting --pooled-continuous
         extra="--pooled-continuous --min-alternate-count 1 --min-alternate-fraction {}".format(
-            config["params"]["freebayes"].get("min_alternate_fraction", "0.01"),
+            config["freebayes"].get("min_alternate_fraction", "0.01"),
         ),
     threads: 10
     wrapper:
