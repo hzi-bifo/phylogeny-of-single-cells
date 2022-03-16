@@ -1,0 +1,1 @@
+Interactive falco quality control plot, emulating FastQC's report. Report for {{ snakemake.wildcards.path_and_file_name }}.
