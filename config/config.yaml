@@ -19,12 +19,14 @@ univec:
   activate: True
   core: True
 
-picard:
-  markduplicates: "--VALIDATION_STRINGENCY LENIENT"
+### params section, alphabetically sorted
+
+freebayes:
+  min_alternate_fraction: 0.005
 
 gatk:
   baserecalibrator: ""
   applybqsr: ""
 
-freebayes:
-  min_alternate_fraction: 0.005
+picard:
+  markduplicates: "--VALIDATION_STRINGENCY LENIENT"
