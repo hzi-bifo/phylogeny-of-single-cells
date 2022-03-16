@@ -48,6 +48,14 @@ units = (
 validate(units, schema="../schemas/units.schema.yaml")
 
 
+#### constrain wildcards to enable unambiguous matching
+
+
+wildcard_constraints:
+    individual="|".join(samples["individual"].unique()),
+    sample="|".join(samples["sample_name"]),
+
+
 #### compile wanted workflow outputs
 
 
