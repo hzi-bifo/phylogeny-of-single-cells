@@ -96,16 +96,6 @@ rule sort_consensus_reads:
         "v1.2.0/bio/samtools/sort"
 
 
-rule bam_index:
-    input:
-        "results/consensus/{sample}.sorted.bam",
-    output:
-        temp("results/consensus/{sample}.sorted.bai"),
-    log:
-        "logs/bam_index/consensus/{sample}.sorted.log",
-    wrapper:
-        "v1.2.0/bio/samtools/index"
-
 
 rule recalibrate_base_qualities:
     input:
