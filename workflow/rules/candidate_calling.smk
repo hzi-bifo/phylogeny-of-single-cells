@@ -9,7 +9,7 @@ rule freebayes:
                 sample=get_individual_samples(w.individual)
             ),
         index=lambda w:
-            expand("results/recal/{sample}.sorted.bam.bai",
+            expand("results/recal/{sample}.sorted.bai",
                 sample=get_individual_samples(w.individual)
             ),
 

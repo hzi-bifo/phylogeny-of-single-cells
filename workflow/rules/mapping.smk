@@ -96,7 +96,7 @@ rule sort_consensus_reads:
         "v1.2.0/bio/samtools/sort"
 
 
-rule bam_index:
+rule bam_index_consensus:
     input:
         "results/consensus/{sample}.sorted.bam",
     output:
