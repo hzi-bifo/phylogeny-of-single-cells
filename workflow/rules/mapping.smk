@@ -155,7 +155,7 @@ rule merge_bulks:
     input:
         expand(
             "results/recal/{bulk_sample}.sorted.bam",
-            bulk_sample=lambda w: samples.loc[samples['individual'] == w.individual and samples['sample_type'] == 'bulk', 'sample_name']
+            bulk_sample=lambda w: samples.loc[(samples['individual'] == w.individual) & (samples['sample_type'] == 'bulk'), 'sample_name']
         ),
     output:
         "results/recal/{individual}.merged_bulk.sorted.bam",
@@ -166,3 +166,14 @@ rule merge_bulks:
     threads: 8
     wrapper:
         "v1.3.1/bio/samtools/merge"
+
+
+rule bam_index_merged_bulks:
+    input:
+        "results/recal/{individual}.merged_bulk.sorted.bam",
+    output:
+        "results/recal/{individual}.merged_bulk.sorted.bam",
+    log:
+        "logs/bam_index/merged_bulks/{individual}.merged_bulk.sorted.log",
+    wrapper:
+        "v1.3.1/bio/samtools/index"
