@@ -32,10 +32,10 @@ rule scatter_candidates:
         "results/candidate-calls/{individual}.freebayes.bcf",
     output:
         scatter.calling(
-            "results/candidate-calls/{individual}.freebayes.{scatteritem}.bcf"
+            "results/candidate-calls/{{individual}}.freebayes.{scatteritem}.bcf"
         ),
     log:
-        "logs/scatter_candidates/{individual}.freebayes.{scatteritem}.log",
+        "logs/scatter_candidates/{individual}.freebayes.log",
     conda:
         "../envs/rbt.yaml"
     shell:
