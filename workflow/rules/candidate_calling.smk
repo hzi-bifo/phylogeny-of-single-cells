@@ -25,3 +25,18 @@ rule freebayes:
     threads: 40
     wrapper:
         "v1.2.0/bio/freebayes"
+
+
+rule scatter_candidates:
+    input:
+        "results/candidate-calls/{individual}.freebayes.bcf",
+    output:
+        scatter.calling(
+            "results/candidate-calls/{{individual}}.freebayes.{scatteritem}.bcf"
+        ),
+    log:
+        "logs/scatter-candidates/{group}.{caller}.log",
+    conda:
+        "../envs/rbt.yaml"
+    shell:
+        "rbt vcf-split {input} {output}"

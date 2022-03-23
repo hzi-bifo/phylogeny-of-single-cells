@@ -67,7 +67,7 @@ def get_final_output():
     for individual in pd.unique(samples.individual):
         final_output.extend(
             expand(
-                "results/calls/{ind}/{sc}.merged_bulk.prosolo.bcf",
+                "results/final-calls/{ind}/{sc}.merged_bulk.prosolo.sorted.bcf",
                 ind=individual,
                 sc=samples.loc[
                     (samples["individual"] == individual)

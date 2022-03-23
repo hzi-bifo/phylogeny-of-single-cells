@@ -10,6 +10,10 @@ min_version("7.2")
 configfile: "config/config.yaml"
 
 
+scattergather:
+    calling=32,
+
+
 include: "rules/common.smk"
 include: "rules/trimming.smk"
 include: "rules/qc.smk"
