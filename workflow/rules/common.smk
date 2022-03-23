@@ -64,11 +64,13 @@ wildcard_constraints:
 def get_final_output():
     final_output = []
 
-    final_output.extend(
-        expand(
-            "results/candidate-calls/{individual}.freebayes.bcf",
-            individual=pd.unique(samples.individual)
-        )
+    for individual in pd.unique(samples.individual):
+        final_output.extend(
+            expand(
+                "results/calls/{ind}/{sc}.merged_bulk.prosolo.bcf",
+                ind=individual,
+                sc=samples.loc[samples['individual'] == individual & samples['sample_type'] == "single_cell", "sample_name"],
+            )
     )
     final_output.append("results/qc/multiqc.html")
 #    for sample, unit in units.index:

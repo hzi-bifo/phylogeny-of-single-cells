@@ -150,3 +150,19 @@ rule apply_bqsr:
         mem_mb=1024
     wrapper:
         "v1.2.0/bio/gatk/applybqsr"
+
+rule merge_bulks:
+    input:
+        expand(
+            "results/recal/{bulk_sample}.sorted.bam",
+            bulk_sample=lambda w: samples.loc[samples['individual'] == w.individual and samples['sample_type'] == 'bulk', 'sample_name']
+        ),
+    output:
+        "results/recal/{individual}.merged_bulk.sorted.bam",
+    log:
+        "logs/samtools/{individual}.merged_bulk.log",
+    params:
+        extra="",  # optional additional parameters as string
+    threads: 8
+    wrapper:
+        "v1.3.1/bio/samtools/merge"
