@@ -172,7 +172,7 @@ rule bam_index_merged_bulks:
     input:
         "results/recal/{individual}.merged_bulk.sorted.bam",
     output:
-        "results/recal/{individual}.merged_bulk.sorted.bam",
+        "results/recal/{individual}.merged_bulk.sorted.bai",
     log:
         "logs/bam_index/merged_bulks/{individual}.merged_bulk.sorted.log",
     wrapper:
