@@ -36,8 +36,8 @@ rule sort_calls:
 
 rule gather_scattered_calls:
     input:
-        calls="results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf",
-        indexes="results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf.csi",
+        calls=gather.calling("results/calls/{{individual}}/{{sc}}.merged_bulk.prosolo.{scatteritem}.sorted.bcf"),
+        indexes=gather.calling("results/calls/{{individual}}/{{sc}}.merged_bulk.prosolo.{scatteritem}.sorted.bcf.csi"),
     output:
         "results/final-calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
     log:
