@@ -4,15 +4,14 @@ rule freebayes:
         ref_idx="resources/reference/full_reference.fa.fai",
         regions="results/regions/{individual}.covered_regions.filtered.bed",
         # you can have a list of samples here
-        samples=lambda w:
-            expand("results/recal/{sample}.sorted.bam",
-                sample=get_individual_samples(w.individual)
-            ),
-        index=lambda w:
-            expand("results/recal/{sample}.sorted.bai",
-                sample=get_individual_samples(w.individual)
-            ),
-
+        samples=lambda w: expand(
+            "results/recal/{sample}.sorted.bam",
+            sample=get_individual_samples(w.individual),
+        ),
+        index=lambda w: expand(
+            "results/recal/{sample}.sorted.bai",
+            sample=get_individual_samples(w.individual),
+        ),
     output:
         "results/candidate-calls/{individual}.freebayes.bcf",
     log:

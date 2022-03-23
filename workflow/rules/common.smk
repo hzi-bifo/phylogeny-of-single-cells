@@ -69,10 +69,15 @@ def get_final_output():
             expand(
                 "results/calls/{ind}/{sc}.merged_bulk.prosolo.bcf",
                 ind=individual,
-                sc=samples.loc[(samples['individual'] == individual) & (samples['sample_type'] == "single_cell")]["sample_name"],
+                sc=samples.loc[
+                    (samples["individual"] == individual)
+                    & (samples["sample_type"] == "single_cell")
+                ]["sample_name"],
             )
-    )
+        )
     final_output.append("results/qc/multiqc.html")
+
+
 #    for sample, unit in units.index:
 #        row = units.loc[sample].loc[unit]
 #        final_output.extend(
@@ -93,7 +98,7 @@ def get_final_output():
 #            )
 #        )
 
-    return final_output
+return final_output
 
 
 #### input functions
@@ -102,10 +107,7 @@ def get_final_output():
 def get_multiqc_input(wildcards):
     multiqc_input = []
     multiqc_input.extend(
-        expand(
-            "results/qc/markdup/{sample}.metrics.txt",
-            sample=samples.sample_name
-        )
+        expand("results/qc/markdup/{sample}.metrics.txt", sample=samples.sample_name)
     )
 
     return multiqc_input
@@ -147,11 +149,11 @@ def get_individual_samples(individual):
 
 
 def get_individual_bulk_samples_bam(wildcards):
-    bulk_samples = samples.loc[(samples['individual'] == wildcards.individual) & (samples['sample_type'] == 'bulk')]['sample_name']
-    return expand(
-        "results/recal/{b}.sorted.bam",
-        b=bulk_samples
-    )
+    bulk_samples = samples.loc[
+        (samples["individual"] == wildcards.individual)
+        & (samples["sample_type"] == "bulk")
+    ]["sample_name"]
+    return expand("results/recal/{b}.sorted.bam", b=bulk_samples)
 
 
 #### params functions
