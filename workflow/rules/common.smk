@@ -76,8 +76,7 @@ def get_final_output():
             )
         )
     final_output.append("results/qc/multiqc.html")
-
-
+#
 #    for sample, unit in units.index:
 #        row = units.loc[sample].loc[unit]
 #        final_output.extend(
@@ -98,7 +97,7 @@ def get_final_output():
 #            )
 #        )
 
-return final_output
+    return final_output
 
 
 #### input functions
