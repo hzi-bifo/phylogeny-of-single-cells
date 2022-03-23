@@ -34,7 +34,7 @@ rule merge_individual_regions:
 rule filter_individual_regions:
     input:
         covered="results/regions/{individual}.covered_regions.bed",
-        fai="resources/reference/full_reference.fa.fai",
+        fai=rules.full_reference_faidx.output,
     output:
         "results/regions/{individual}.covered_regions.filtered.bed",
     params:
