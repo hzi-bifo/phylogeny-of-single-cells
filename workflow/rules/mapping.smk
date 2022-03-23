@@ -155,7 +155,7 @@ rule merge_bulks:
     input:
         expand(
             "results/recal/{bulk_sample}.sorted.bam",
-            bulk_sample=lambda w: samples.loc[(samples['individual'] == w.individual) & (samples['sample_type'] == 'bulk'), 'sample_name']
+            bulk_sample=lambda w: samples.loc[(samples['individual'] == w.individual) & (samples['sample_type'] == 'bulk')]['sample_name']
         ),
     output:
         "results/recal/{individual}.merged_bulk.sorted.bam",

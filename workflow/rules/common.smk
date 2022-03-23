@@ -69,7 +69,7 @@ def get_final_output():
             expand(
                 "results/calls/{ind}/{sc}.merged_bulk.prosolo.bcf",
                 ind=individual,
-                sc=samples.loc[(samples['individual'] == individual) & (samples['sample_type'] == "single_cell"), "sample_name"],
+                sc=samples.loc[(samples['individual'] == individual) & (samples['sample_type'] == "single_cell")]["sample_name"],
             )
     )
     final_output.append("results/qc/multiqc.html")
