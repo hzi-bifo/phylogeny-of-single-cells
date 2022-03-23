@@ -34,6 +34,19 @@ rule sort_calls:
         "-Ob {input} > {output} 2> {log}"
 
 
+rule bcftools_index_scattered_calls:
+    input:
+        "results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf",
+    output:
+        temp("results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf.csi"),
+    log:
+        "logs/bcftools_index/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.log",
+    conda:
+        "../envs/bcftools.yaml"
+    shell:
+        "bcftools index {input} 2> {log}"
+
+
 rule gather_scattered_calls:
     input:
         calls=gather.calling("results/calls/{{individual}}/{{sc}}.merged_bulk.prosolo.{scatteritem}.sorted.bcf"),
