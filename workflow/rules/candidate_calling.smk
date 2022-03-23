@@ -23,6 +23,6 @@ rule freebayes:
         extra="--pooled-continuous --min-alternate-count 1 --min-alternate-fraction {}".format(
             config["freebayes"].get("min_alternate_fraction", "0.01"),
         ),
-    threads: 48
+    threads: 40
     wrapper:
         "v1.2.0/bio/freebayes"
