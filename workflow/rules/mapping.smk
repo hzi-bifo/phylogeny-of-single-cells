@@ -153,10 +153,7 @@ rule apply_bqsr:
 
 rule merge_bulks:
     input:
-        expand(
-            "results/recal/{bulk_sample}.sorted.bam",
-            bulk_sample=lambda w: samples.loc[(samples['individual'] == w.individual) & (samples['sample_type'] == 'bulk')]['sample_name']
-        ),
+        get_individual_bulk_samples_bam,
     output:
         "results/recal/{individual}.merged_bulk.sorted.bam",
     log:

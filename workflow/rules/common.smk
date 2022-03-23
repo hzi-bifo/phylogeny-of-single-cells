@@ -146,6 +146,14 @@ def get_individual_samples(individual):
     return samples.loc[samples["individual"] == individual]["sample_name"]
 
 
+def get_individual_bulk_samples_bam(wildcards):
+    bulk_samples = samples.loc[(samples['individual'] == wildcards.individual) & (samples['sample_type'] == 'bulk')]['sample_name']
+    return expand(
+        "results/recal/{b}.sorted.bam",
+        b=bulk_samples
+    )
+
+
 #### params functions
 
 
