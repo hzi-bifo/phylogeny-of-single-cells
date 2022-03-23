@@ -33,7 +33,8 @@ rule merge_individual_regions:
 
 rule filter_individual_regions:
     input:
-        "results/regions/{individual}.covered_regions.bed",
+        covered="results/regions/{individual}.covered_regions.bed",
+        fai="resources/reference/full_reference.fa.fai",
     output:
         "results/regions/{individual}.covered_regions.filtered.bed",
     params:
@@ -41,6 +42,6 @@ rule filter_individual_regions:
     log:
         "logs/regions/{individual}.covered_regions.filtered.log",
     shell:
-        "cat {input} | grep -f <(head -n {params.chroms} resources/genome.fasta.fai | "
+        "cat {input.covered} | grep -f <(head -n {params.chroms} {input.fai} | "
         'awk \'{{print "^"$1"\\t"}}\') '
         "> {output} 2> {log}"
