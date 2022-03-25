@@ -37,7 +37,7 @@ rule freebayes_per_region:
     output:
         "results/candidate-calls/{individual}.{region}.freebayes.bcf",
     log:
-        "logs/freebayes/{individual}.log",
+        "logs/freebayes/{individual}.{region}.log",
     conda:
         "../envs/freebayes.yaml"
     params:
