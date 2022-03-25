@@ -1,5 +1,6 @@
 import pandas as pd
 from os import path
+from tempfile import TemporaryDirectory
 
 from snakemake.utils import validate
 
@@ -153,6 +154,19 @@ def get_individual_bulk_samples_bam(wildcards):
         & (samples["sample_type"] == "bulk")
     ]["sample_name"]
     return expand("results/recal/{b}.sorted.bam", b=bulk_samples)
+
+
+def aggregate_freebayes_input(wildcards):
+    # decision based on content of output file
+    # Important: use the method open() of the returned file!
+    # This way, Snakemake is able to automatically download the file if it is generated in
+    # a cloud environment without a shared filesystem.
+    with checkpoints.create_freebayes_regions.get(individual=wildcards.individual).output[0].open() as f:
+        return expand(
+            "results/candidate-calls/{ind}.{region}.freebayes.bcf",
+            ind=wildcards.individual,
+            region=[region for region in f],
+        )
 
 
 #### params functions

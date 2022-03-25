@@ -23,6 +23,7 @@ univec:
 
 freebayes:
   min_alternate_fraction: 0.005
+  chunksize: 100000
 
 gatk:
   baserecalibrator: ""

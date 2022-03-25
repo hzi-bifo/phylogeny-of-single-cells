@@ -1,8 +1,30 @@
-rule freebayes:
+checkpoint create_freebayes_regions:
     input:
         ref="resources/reference/full_reference.fa",
         ref_idx="resources/reference/full_reference.fa.fai",
         regions="results/regions/{individual}.covered_regions.filtered.bed",
+    output:
+        "results/regions/{individual}.freebayes_regions.bed"
+    log:
+        "logs/regions/{individual}.freebayes_regions.log"
+    conda:
+        "../envs/freebayes.yaml"
+    params:
+        chunksize=lambda w: config["freebayes"]["chunksize"]
+    shell:
+        "( bedtools intersect -a "
+        r"  <(sed 's/:\([0-9]*\)-\([0-9]*\)$/\t\1\t\2/' "
+        "     <(fasta_generate_regions.py {snakemake.input.ref}.fai {params.chunksize} )"
+        "    ) "
+        "   -b {snakemake.input.regions} | "
+        r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/:\1-\2/') > {output}"
+        "  ) 2> {log} "
+
+
+rule freebayes_per_region:
+    input:
+        ref="resources/reference/full_reference.fa",
+        ref_idx="resources/reference/full_reference.fa.fai",
         # you can have a list of samples here
         samples=lambda w: expand(
             "results/recal/{sample}.sorted.bam",
@@ -13,18 +35,41 @@ rule freebayes:
             sample=get_individual_samples(w.individual),
         ),
     output:
-        "results/candidate-calls/{individual}.freebayes.bcf",
+        "results/candidate-calls/{individual}.{region}.freebayes.bcf",
     log:
         "logs/freebayes/{individual}.log",
+    conda:
+        "../envs/freebayes.yaml"
     params:
         # genotyping is performed by prosolo, hence we deactivate it in freebayes by 
         # always setting --pooled-continuous
-        extra="--pooled-continuous --min-alternate-count 1 --min-alternate-fraction {}".format(
+        extra="--pooled-continuous --min-alternate-count 1 --min-alternate-total 2 --min-alternate-fraction {}".format(
             config["freebayes"].get("min_alternate_fraction", "0.01"),
         ),
-    threads: 40
+    threads: 2
+    run:
+        with TemporaryDirectory() as tempdir:
+            shell(
+                "(freebayes {params.extra} -f {input.ref} {input.samples} | "
+                " bcftools sort -O b -o {output} -T {tempdir} - ) 2> {log}"
+            )
+
+
+rule aggregate_freebayes:
+    input:
+        aggregate_freebayes_input
+    output:
+        "results/candidate-calls/{individual}.freebayes.bcf",
+    log:
+        "logs/aggregate_candidate_calls/{individual}.freebayes.bcf",
+    params:
+        uncompressed_bcf=False,
+        extra="--allow-overlaps",  # optional parameters for bcftools concat (except -o)
+    threads: 4
+    resources:
+        mem_mb=16000,
     wrapper:
-        "v1.2.0/bio/freebayes"
+        "v1.3.1/bio/bcftools/concat"
 
 
 rule scatter_candidates:
