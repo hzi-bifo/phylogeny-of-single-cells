@@ -49,7 +49,7 @@ rule freebayes_per_region:
     threads: 2
     shell:
         "(freebayes {params.extra} -f {input.ref} {input.samples} | "
-        " bcftools sort -O b -o {output} - ) 2> {log}"
+        " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
 
 
 rule aggregate_freebayes:
