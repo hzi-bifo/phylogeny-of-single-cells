@@ -47,12 +47,9 @@ rule freebayes_per_region:
             config["freebayes"].get("min_alternate_fraction", "0.01"),
         ),
     threads: 2
-    run:
-        with TemporaryDirectory() as tempdir:
-            shell(
-                "(freebayes {params.extra} -f {input.ref} {input.samples} | "
-                " bcftools sort -O b -o {output} -T {tempdir} - ) 2> {log}"
-            )
+    shell:
+        "(freebayes {params.extra} -f {input.ref} {input.samples} | "
+        " bcftools sort -O b -o {output} - ) 2> {log}"
 
 
 rule aggregate_freebayes:
