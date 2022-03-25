@@ -14,9 +14,9 @@ checkpoint create_freebayes_regions:
     shell:
         "( bedtools intersect -a "
         r"  <(sed 's/:\([0-9]*\)-\([0-9]*\)$/\t\1\t\2/' "
-        "     <(fasta_generate_regions.py {snakemake.input.ref}.fai {params.chunksize} )"
+        "     <(fasta_generate_regions.py {input.ref}.fai {params.chunksize} )"
         "    ) "
-        "   -b {snakemake.input.regions} | "
+        "   -b {input.regions} | "
         r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/:\1-\2/') > {output}"
         "  ) 2> {log} "
 
