@@ -165,7 +165,7 @@ def aggregate_freebayes_input(wildcards):
         return expand(
             "results/candidate-calls/{ind}.{region}.freebayes.bcf",
             ind=wildcards.individual,
-            region=[region for region in f],
+            region=[region.strip() for region in f],
         )
 
 
