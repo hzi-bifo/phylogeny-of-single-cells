@@ -17,7 +17,7 @@ checkpoint create_freebayes_regions:
         "     <(fasta_generate_regions.py {input.ref}.fai {params.chunksize} )"
         "    ) "
         "   -b {input.regions} | "
-        r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/:\1-\2/') > {output}"
+        r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/:\1-\2/' > {output}"
         "  ) 2> {log} "
 
 
