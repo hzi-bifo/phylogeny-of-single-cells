@@ -44,41 +44,12 @@ rule freebayes_per_region:
         # genotyping is performed by prosolo, hence we deactivate it in freebayes by 
         # always setting --pooled-continuous
         extra="--pooled-continuous --min-alternate-count 1 --min-alternate-total 2 --min-alternate-fraction {}".format(
-            config["freebayes"].get("min_alternate_fraction", "0.01"),
+            config["freebayes"].get("min_alternate_fraction", "0.005"),
         ),
-    threads: 2
-    shell:
-        "(freebayes {params.extra} -f {input.ref} {input.samples} | "
-        " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
-
-
-rule aggregate_freebayes:
-    input:
-        aggregate_freebayes_input
-    output:
-        "results/candidate-calls/{individual}.freebayes.bcf",
-    log:
-        "logs/aggregate_candidate_calls/{individual}.freebayes.bcf",
-    params:
-        uncompressed_bcf=False,
-        extra="--allow-overlaps",  # optional parameters for bcftools concat (except -o)
-    threads: 4
+    threads: 1
     resources:
-        mem_mb=16000,
-    wrapper:
-        "v1.3.1/bio/bcftools/concat"
-
-
-rule scatter_candidates:
-    input:
-        "results/candidate-calls/{individual}.freebayes.bcf",
-    output:
-        scatter.calling(
-            "results/candidate-calls/{{individual}}.freebayes.{scatteritem}.bcf"
-        ),
-    log:
-        "logs/scatter_candidates/{individual}.freebayes.log",
-    conda:
-        "../envs/rbt.yaml"
+        time=lambda wildcards, attempt: f"{5 * attempt}:59:00",
+        mem_mb=4990
     shell:
-        "rbt vcf-split {input} {output}"
+        "(freebayes {params.extra} -r {wildcards.region} -f {input.ref} {input.samples} | "
+        " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"

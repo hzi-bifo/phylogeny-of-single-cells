@@ -6,51 +6,53 @@ rule prosolo_calling:
         bulk_index="results/recal/{individual}.merged_bulk.sorted.bai",
         ref=rules.create_full_reference.output,
         ref_idx=rules.full_reference_faidx.output,
-        candidates="results/candidate-calls/{individual}.freebayes.{scatteritem}.bcf",
+        candidates="results/candidate-calls/{individual}.{region}.freebayes.bcf",
     output:
-        "results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.bcf",
+        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.bcf",
     params:
         extra="",
     threads: 1
+    resources:
+        time=lambda wildcards, attempt: f"{1 * attempt - 1 }:29:00"    
     log:
-        "logs/prosolo/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.log",
+        "logs/prosolo/{individual}/{sc}.{region}.merged_bulk.prosolo.log",
     wrapper:
         "v1.3.1/bio/prosolo/single-cell-bulk"
 
 
 rule sort_calls:
     input:
-        "results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.bcf",
+        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.bcf",
     output:
-        temp("results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf"),
+        temp("results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf"),
     log:
-        "logs/bcf-sort/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.log",
+        "logs/bcf-sort/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.log",
     conda:
         "../envs/bcftools.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=4000,
     shell:
         "bcftools sort --max-mem {resources.mem_mb}M --temp-dir `mktemp -d` "
         "-Ob {input} > {output} 2> {log}"
 
 
-rule bcftools_index_scattered_calls:
+rule bcftools_index_region_calls:
     input:
-        "results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf",
+        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf",
     output:
-        temp("results/calls/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.bcf.csi"),
+        temp("results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf.csi"),
     log:
-        "logs/bcftools_index/{individual}/{sc}.merged_bulk.prosolo.{scatteritem}.sorted.log",
+        "logs/bcftools_index/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.log",
     conda:
         "../envs/bcftools.yaml"
     shell:
         "bcftools index {input} 2> {log}"
 
 
-rule gather_scattered_calls:
+rule aggregate_prosolo_region_calls:
     input:
-        calls=gather.calling("results/calls/{{individual}}/{{sc}}.merged_bulk.prosolo.{scatteritem}.sorted.bcf"),
-        indexes=gather.calling("results/calls/{{individual}}/{{sc}}.merged_bulk.prosolo.{scatteritem}.sorted.bcf.csi"),
+        calls=aggregate_prosolo_region_calls_input(),
+        indexes=aggregate_prosolo_region_calls_input(ext=".bcf.csi"),
     output:
         "results/final-calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
     log:
