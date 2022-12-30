@@ -4,4 +4,4 @@ channels:
   - nodefaults
 dependencies:
   - rust-bio-tools =0.39
-  - bcftools =1.15
+  - bcftools =1
