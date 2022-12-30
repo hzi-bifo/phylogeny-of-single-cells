@@ -1,6 +1,7 @@
 channels:
   - bioconda
   - conda-forge
+  - nodefaults
 dependencies:
   - rust-bio-tools =0.39
   - bcftools =1.15
