@@ -56,7 +56,7 @@ rule bwa_index:
     params:
         algorithm="bwtsw",
     wrapper:
-        "v1.2.0/bio/bwa/index"
+        "v1.21.1/bio/bwa/index"
 
 
 rule full_reference_dict:
@@ -82,7 +82,7 @@ rule full_reference_faidx:
         "logs/samtools/full_reference_faidx.log",
     cache: True
     wrapper:
-        "v1.2.0/bio/samtools/faidx"
+        "v1.21.1/bio/samtools/faidx"
 
 
 rule get_known_variants:
@@ -100,7 +100,7 @@ rule get_known_variants:
         type="all",
     cache: True
     wrapper:
-        "v1.2.0/bio/reference/ensembl-variation"
+        "v1.21.1/bio/reference/ensembl-variation"
 
 
 rule remove_iupac_codes:
@@ -128,4 +128,4 @@ rule tabix_variation_noiupac:
         "-p vcf",
     cache: True
     wrapper:
-        "v1.2.0/bio/tabix"
+        "v1.21.1/bio/tabix"

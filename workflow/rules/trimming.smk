@@ -12,7 +12,7 @@ rule cutadapt:
         "logs/cutadapt/{sample}.{unit}.log",
     threads: 4  # set desired number of threads here
     wrapper:
-        "v1.1.0/bio/cutadapt/pe"
+        "v1.21.1/bio/cutadapt/pe"
 
 
 rule merge_fastqs:

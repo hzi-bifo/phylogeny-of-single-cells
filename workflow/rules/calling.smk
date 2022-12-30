@@ -17,7 +17,7 @@ rule prosolo_calling:
     log:
         "logs/prosolo/{individual}/{sc}.{region}.merged_bulk.prosolo.log",
     wrapper:
-        "v1.3.1/bio/prosolo/single-cell-bulk"
+        "v1.21.1/bio/prosolo/single-cell-bulk"
 
 
 rule sort_calls:
@@ -60,4 +60,4 @@ rule aggregate_prosolo_region_calls:
     params:
         extra="-a",
     wrapper:
-        "v1.3.1/bio/bcftools/concat"
+        "v1.21.1/bio/bcftools/concat"
