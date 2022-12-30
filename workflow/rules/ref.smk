@@ -128,4 +128,4 @@ rule tabix_variation_noiupac:
         "-p vcf",
     cache: True
     wrapper:
-        "v1.21.1/bio/tabix"
+        "v1.21.1/bio/tabix/index"
