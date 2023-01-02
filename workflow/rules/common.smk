@@ -57,6 +57,8 @@ validate(units, schema="../schemas/units.schema.yaml")
 wildcard_constraints:
     individual="|".join(samples["individual"].unique()),
     sample="|".join(samples["sample_name"]),
+    sc="|".join(samples["sample_name"]),
+    genotype="|".join(["hom_ref", "het", "hom_alt"]),
 
 
 #### compile wanted workflow outputs
