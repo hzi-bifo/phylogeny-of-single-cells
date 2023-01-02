@@ -32,3 +32,16 @@ rule merge_raxml_ng_genotypes_per_cell:
     script:
         "../scripts/merge_raxml_ng_genotypes_per_cell.R"
 
+
+rule merge_raxml_ng_genotypes_per_individual:
+    input:
+        get_all_gts_for_individual()
+    output:
+        "results/raxml_ng/{individual}.genotype_likelihoods.tsv"
+    log:
+        "logs/raxml_ng/{individual}.genotype_likelihoods.log"
+    conda:
+        "../envs/tidyverse.yaml"
+    script:
+        "../scripts/merge_raxml_ng_genotypes_per_individual.R"
+
