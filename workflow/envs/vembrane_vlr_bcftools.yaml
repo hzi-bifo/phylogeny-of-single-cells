@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - vembrane =0.13
+  - varlociraptor =5.6
+  - bcftools =1

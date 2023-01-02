@@ -18,6 +18,7 @@ include: "rules/mapping.smk"
 include: "rules/regions.smk"
 include: "rules/candidate_calling.smk"
 include: "rules/calling.smk"
+include: "rules/phylogeny.smk"
 
 
 rule all:
