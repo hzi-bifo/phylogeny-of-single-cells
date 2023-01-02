@@ -20,13 +20,13 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
 
 rule merge_raxml_ng_genotypes_per_cell:
     input:
-        hom_ref="results/raxml-ng/{individual}/per_genotype/{sc}.hom_ref.genotype_likelihoods.tsv",
-        het="results/raxml-ng/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
-        hom_alt="results/raxml-ng/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
+        hom_ref="results/raxml_ng/{individual}/per_genotype/{sc}.hom_ref.genotype_likelihoods.tsv",
+        het="results/raxml_ng/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
+        hom_alt="results/raxml_ng/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
     output:
-        "results/raxml-ng/{individual}/{sc}.genotype_likelihoods.tsv"
+        "results/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv"
     log:
-        "logs/raxml-ng/{individual}/{sc}.genotype_likelihoods.tsv"
+        "logs/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv"
     conda:
         "../envs/tidyverse.yaml"
     script:
