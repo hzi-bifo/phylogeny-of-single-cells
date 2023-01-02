@@ -61,8 +61,8 @@ to_raxml_ng_genotype_likelihoods <- function(ref, alt, lookup_table, order, hom_
 read_genotype <- function(genotype) {
   return read_tsv(snakemake@input[[genotype]]) %>%
     mutate(
-      raxml_ng_gt = to_raxml_ng_genotype(genotype, REF, ALT, raxml_ng_genotype_lookup_table)
-      raxml_ng_gt_likelihoods = to_raxml_ng_genotype_likelihoods(REF, ALT, raxml_ng_genotype_lookup_table, HOM_REF, HET, HOM_ALT)
+      ml_genotype = to_raxml_ng_genotype(genotype, REF, ALT, raxml_ng_genotype_lookup_table)
+      likelihoods = to_raxml_ng_genotype_likelihoods(REF, ALT, raxml_ng_genotype_lookup_table, HOM_REF, HET, HOM_ALT)
     ) %>%
     select(
       !c(HOM_REF, HET, HOM_ALT)
@@ -75,6 +75,7 @@ all_genotypes <- read_genotype("hom_ref") %>%
   ) %>%
   bind_rows(
     read_genotype("hom_alt")
-  )
+  ) %>%
+  add_column(cell = snakemake@wildcards.sc)
 
 write_tsv(all_genotypes, snakemake@output[[1]])
