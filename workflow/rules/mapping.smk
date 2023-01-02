@@ -46,8 +46,8 @@ rule calc_consensus_reads:
         "logs/consensus/{sample}.log",
     conda:
         "../envs/rbt.yaml"
-    shell:
-        "rbt collapse-reads-to-fragments bam {input} {output} &> {log}"
+    wrapper:
+        "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
 
 
 rule map_consensus_reads:
