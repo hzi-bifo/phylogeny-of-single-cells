@@ -54,7 +54,7 @@ rule aggregate_prosolo_region_calls:
         calls=aggregate_prosolo_region_calls_input(),
         indexes=aggregate_prosolo_region_calls_input(ext=".bcf.csi"),
     output:
-        "results/final-calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
+        "results/calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
     log:
         "logs/gather_scattered_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.log",
     params:
