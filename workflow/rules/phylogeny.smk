@@ -26,7 +26,7 @@ rule merge_raxml_ng_genotypes_per_cell:
     output:
         "results/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv"
     log:
-        "logs/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv"
+        "logs/raxml_ng/{individual}/{sc}.genotype_likelihoods.log"
     conda:
         "../envs/tidyverse.yaml"
     script:
