@@ -53,3 +53,21 @@ rule freebayes_per_region:
     shell:
         "(freebayes {params.extra} -r {wildcards.region} -f {input.ref} {input.samples} | "
         " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
+
+rule bcftools_norm_candidate_calls:
+    input:
+        "results/candidate-calls/{individual}.{region}.freebayes.bcf",
+    output:
+        "results/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
+    log:
+        "logs/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
+    conda:
+        "../envs/bcftools.yaml"
+    shell:
+        # TODO: turn off the following atomize and instead activate --do-not-normalize
+        # once the ProSolo model ist re-integrated with varlociraptor
+        "( bcftools norm --multiallelics -any --atomize {input} |"
+        # TODO: turn off the following filter to snps once ProSolo is integrated with
+        # varlociraptor
+        "  bcftools view -O b -o {output} --types snps"
+        ") 2>{log}"

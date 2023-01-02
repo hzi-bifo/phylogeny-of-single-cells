@@ -6,7 +6,7 @@ rule prosolo_calling:
         bulk_index="results/recal/{individual}.merged_bulk.sorted.bai",
         ref=rules.create_full_reference.output,
         ref_idx=rules.full_reference_faidx.output,
-        candidates="results/candidate-calls/{individual}.{region}.freebayes.bcf",
+        candidates="results/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
     output:
         "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.bcf",
     params:
