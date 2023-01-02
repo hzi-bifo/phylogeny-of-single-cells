@@ -57,7 +57,7 @@ to_raxml_ng_genotype_likelihoods <- function(ref, alt, lookup_table, order, hom_
   hom_alt_index <- which(iupac_of(alt, alt, lookup_table), order)
   likelihoods[hom_alt_index] <- hom_alt_likelihood
 
-  likelihoods
+  str_c(likelihoods, collapse=",")
 }
 
 read_genotype <- function(genotype) {
