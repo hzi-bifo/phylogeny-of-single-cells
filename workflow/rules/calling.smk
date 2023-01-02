@@ -8,7 +8,7 @@ rule prosolo_calling:
         ref_idx=rules.full_reference_faidx.output,
         candidates="results/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
     output:
-        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.bcf",
+        "results/calls/{individual}/{sc}/{region}.merged_bulk.prosolo.bcf",
     params:
         extra="",
     threads: 1
@@ -22,11 +22,11 @@ rule prosolo_calling:
 
 rule sort_calls:
     input:
-        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.bcf",
+        "results/calls/{individual}/{sc}/{region}.merged_bulk.prosolo.bcf",
     output:
-        temp("results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf"),
+        temp("results/calls/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.bcf"),
     log:
-        "logs/bcf-sort/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.log",
+        "logs/bcf-sort/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.log",
     conda:
         "../envs/bcftools.yaml"
     resources:
@@ -38,11 +38,11 @@ rule sort_calls:
 
 rule bcftools_index_region_calls:
     input:
-        "results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf",
+        "results/calls/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.bcf",
     output:
-        temp("results/calls/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.bcf.csi"),
+        temp("results/calls/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.bcf.csi"),
     log:
-        "logs/bcftools_index/{individual}/{sc}.{region}.merged_bulk.prosolo.sorted.log",
+        "logs/bcftools_index/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.log",
     conda:
         "../envs/bcftools.yaml"
     shell:

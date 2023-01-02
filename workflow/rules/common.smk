@@ -166,9 +166,9 @@ def aggregate_prosolo_region_calls_input(ext=".bcf"):
         # a cloud environment without a shared filesystem.
         with checkpoints.create_freebayes_regions.get(individual=wildcards.individual).output[0].open() as f:
             return expand(
-                    "results/calls/{ind}/{cell}.{region}.merged_bulk.prosolo.sorted{ext}",
+                    "results/calls/{ind}/{sc}/{region}.merged_bulk.prosolo.sorted{ext}",
                     ind=wildcards.individual,
-                    cell=wildcards.sc,
+                    sc=wildcards.sc,
                     region=[region.strip() for region in f],
                     ext=ext
                 )
