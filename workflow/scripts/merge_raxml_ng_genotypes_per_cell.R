@@ -2,6 +2,8 @@ log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")
 
+library(tidyverse)
+
 raxml_ng_genotype_lookup_table <- tribble(
    ~a,  ~b, ~iupac,
   "A", "A",    "A",
