@@ -55,6 +55,8 @@ rule bwa_index:
         "logs/bwa_index.log",
     params:
         algorithm="bwtsw",
+    resources:
+        runtime='01:29:00',
     wrapper:
         "v1.21.1/bio/bwa/index"
 
@@ -110,6 +112,8 @@ rule remove_iupac_codes:
         "resources/variation.noiupac.vcf.gz",
     log:
         "logs/rbt/remove_iupac_codes.log",
+    resources:
+        runtime='00:59:00',
     conda:
         "../envs/rbt.yaml"
     cache: True

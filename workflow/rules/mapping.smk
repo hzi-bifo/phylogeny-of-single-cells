@@ -10,6 +10,8 @@ rule map_reads:
         extra=get_read_group,
         sorting="samtools",
         sort_order="coordinate",
+    resources:
+        runtime='02:59:00',
     threads: 8
     wrapper:
         "v1.21.1/bio/bwa/mem"
@@ -30,6 +32,7 @@ rule mark_duplicates:
         ),
     resources:
         mem_mb=4096,
+        runtime='01:59:00'
     wrapper:
         "v1.21.1/bio/picard/markduplicates"
 
@@ -44,8 +47,8 @@ rule calc_consensus_reads:
         skipped=temp("results/consensus/{sample}.skipped.bam"),
     log:
         "logs/consensus/{sample}.log",
-    conda:
-        "../envs/rbt.yaml"
+    resources:
+        runtime='05:59:00',
     wrapper:
         "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
 
@@ -61,6 +64,8 @@ rule map_consensus_reads:
         extra=lambda w: "-C {}".format(get_read_group(w)),
         sort="samtools",
         sort_order="coordinate",
+    resources:
+        runtime='00:29:00',
     wildcard_constraints:
         read_type="pe|se",
     log:
@@ -126,6 +131,7 @@ rule recalibrate_base_qualities:
     threads: 8
     resources:
         mem_mb=1024,
+        runtime='00:59:00',
     wrapper:
         "v1.21.1/bio/gatk/baserecalibratorspark"
 
@@ -148,6 +154,7 @@ rule apply_bqsr:
         java_opts="",  # optional
     resources:
         mem_mb=1024,
+        runtime='00:59:00',
     wrapper:
         "v1.21.1/bio/gatk/applybqsr"
 

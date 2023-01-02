@@ -8,6 +8,8 @@ rule cutadapt:
     params:
         # https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types
         adapters=get_cutadapt_parameters,
+    params:
+        runtime='00:59:00',
     log:
         "logs/cutadapt/{sample}.{unit}.log",
     threads: 4  # set desired number of threads here
