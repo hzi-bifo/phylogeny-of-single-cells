@@ -57,6 +57,7 @@ rule bwa_index:
         algorithm="bwtsw",
     resources:
         runtime='01:29:00',
+        mem_mb=9000,
     wrapper:
         "v1.21.1/bio/bwa/index"
 
