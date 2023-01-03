@@ -35,7 +35,7 @@ rule merge_raxml_ng_genotypes_per_cell:
 
 rule merge_raxml_ng_genotypes_per_individual:
     input:
-        get_all_gts_for_individual()
+        get_all_gts_for_individual,
     output:
         "results/raxml_ng/{individual}.genotype_likelihoods.tsv"
     log:
