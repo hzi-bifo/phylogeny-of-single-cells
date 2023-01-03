@@ -1,4 +1,4 @@
-$schema: "https://json-schema.org/draft/2020-12/schema"
+$schema: "http://json-schema.org/draft/2020-12/schema"
 
 description: an entry (row) in the sample sheet, representing a DNA sequencing sample from either a bulk of cells or a multiple displacement amplified single cell DNA
 
