@@ -24,6 +24,8 @@ rule merge_fastqs:
         temp("results/merged/{sample}.{read}.fastq.gz"),
     log:
         "logs/merge-fastqs/{sample}.{read}.log",
+    resources:
+        runtime='00:39:00',
     wildcard_constraints:
         read="1|2",
     shell:
