@@ -29,7 +29,7 @@ rule mark_duplicates:
     params:
         extra="{c} {d}".format(
             c=config["picard"]["markduplicates"],
-            d="--TAG_DUPLICATE_SET_MEMBERS true --SORTING_COLLECTION_SIZE_RATIO 0.15",
+            d="--TAG_DUPLICATE_SET_MEMBERS true --SORTING_COLLECTION_SIZE_RATIO 0.1",
         ),
     resources:
         mem_mb=4096,
