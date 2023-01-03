@@ -12,7 +12,7 @@ rule map_reads:
         sort_order="coordinate",
     resources:
         runtime='02:59:00',
-        mem_mb=9000,
+        mem_mb=16000,
     threads: 8
     wrapper:
         "v1.21.1/bio/bwa/mem"
