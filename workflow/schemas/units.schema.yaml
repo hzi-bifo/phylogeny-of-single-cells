@@ -1,4 +1,4 @@
-$schema: "http://json-schema.org/draft/2020-12/schema"
+$schema: "https://json-schema.org/draft/2020-12/schema#"
 
 description: an entry (row) in the units.tsv, representing a sequencing unit (for example single-end or paired-end data for a sample from a specific run)
 
