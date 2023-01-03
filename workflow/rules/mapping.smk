@@ -32,7 +32,7 @@ rule mark_duplicates:
             d="--TAG_DUPLICATE_SET_MEMBERS true",
         ),
     resources:
-        mem_mb=4096,
+        mem_mb=6000,
         runtime='01:59:00'
     wrapper:
         "v1.21.1/bio/picard/markduplicates"
