@@ -34,7 +34,7 @@ rule mark_duplicates:
             c=config["picard"]["markduplicates"],
             d="--TAG_DUPLICATE_SET_MEMBERS true --SORTING_COLLECTION_SIZE_RATIO 0.1",
         ),
-        bams=lambda wc, input: list(map("--INPUT {}".format, [ bams ] if isinstance(bams, str) else bams)),
+        bams=lambda wc, input: list(map("--INPUT {}".format, [ input.bams ] if isinstance(input.bams, str) else input.bams)),
     resources:
         mem_mb=4096,
         runtime='01:59:00',
