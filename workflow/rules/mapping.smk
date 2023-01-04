@@ -56,6 +56,7 @@ rule calc_consensus_reads:
     params:
         extra="",
     resources:
+        mem_mb=10240,
         runtime='05:59:00',
     wrapper:
         "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
