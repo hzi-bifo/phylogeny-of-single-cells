@@ -29,7 +29,7 @@ rule mark_duplicates:
     conda:
         "../envs/picard.yaml"
     params:
-        java_opts="-Xmx3800m",
+        java_opts="-Xmx3072",
         extra="{c} {d}".format(
             c=config["picard"]["markduplicates"],
             d="--TAG_DUPLICATE_SET_MEMBERS true --SORTING_COLLECTION_SIZE_RATIO 0.1",
