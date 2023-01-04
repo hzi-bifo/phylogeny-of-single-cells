@@ -3,7 +3,7 @@ rule map_reads:
         reads=expand("results/merged/{{sample}}.{read}.fastq.gz", read=["1", "2"]),
         idx=rules.bwa_index.output,
     output:
-        temp("results/mapped/{sample}.sorted.bam"),
+        "results/mapped/{sample}.sorted.bam",
     log:
         "logs/bwa_mem/{sample}.log",
     params:
