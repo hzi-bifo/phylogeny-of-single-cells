@@ -48,6 +48,8 @@ rule calc_consensus_reads:
         skipped=temp("results/consensus/{sample}.skipped.bam"),
     log:
         "logs/consensus/{sample}.log",
+    params:
+        extra="",
     resources:
         runtime='05:59:00',
     wrapper:
