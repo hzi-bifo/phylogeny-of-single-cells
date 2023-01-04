@@ -26,16 +26,29 @@ rule mark_duplicates:
         metrics="results/qc/markdup/{sample}.metrics.txt",
     log:
         "logs/picard/markdup/{sample}.log",
+    conda:
+        "../envs/picard.yaml"
     params:
+        java_opts="-Xmx3800m"
         extra="{c} {d}".format(
             c=config["picard"]["markduplicates"],
             d="--TAG_DUPLICATE_SET_MEMBERS true --SORTING_COLLECTION_SIZE_RATIO 0.1",
         ),
+        bams=lambda wc, input: list(map("--INPUT {}".format, [ bams ] if isinstance(bams, str) else bams))
     resources:
         mem_mb=4096,
         runtime='01:59:00'
-    wrapper:
-        "v1.21.1/bio/picard/markduplicates"
+    run:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            "( picard MarkDuplicates"  # Tool and its subcommand
+            "   {params.java_opts}"  # Automatic java option
+            "   {params.extra}"  # User defined parmeters
+            "   {params.bams}"  # Input bam(s)
+            "   --TMP_DIR {tmpdir}"
+            "   --OUTPUT {output.bam}"  # Output bam
+            "   --METRICS_FILE {output.metrics}"  # Output metrics
+            ") 2>{log} "  # Logging
 
 
 rule calc_consensus_reads:
