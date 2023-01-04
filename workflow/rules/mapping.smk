@@ -38,17 +38,9 @@ rule mark_duplicates:
     resources:
         mem_mb=4096,
         runtime='01:59:00',
-    run:
-        import tempfile
-        with tempfile.TemporaryDirectory() as tmpdir:
-            "( picard MarkDuplicates"  # Tool and its subcommand
-            "   {params.java_opts}"  # Automatic java option
-            "   {params.extra}"  # User defined parmeters
-            "   {params.bams}"  # Input bam(s)
-            "   --TMP_DIR {tmpdir}"
-            "   --OUTPUT {output.bam}"  # Output bam
-            "   --METRICS_FILE {output.metrics}"  # Output metrics
-            ") 2>{log} "  # Logging
+    script:
+        "../scripts/picard_markduplicates.py"
+
 
 
 rule calc_consensus_reads:
