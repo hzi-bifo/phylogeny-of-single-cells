@@ -56,7 +56,7 @@ rule calc_consensus_reads:
     params:
         extra="",
     resources:
-        mem_mb=10240,
+        mem_mb=lambda wildcards, input: 1.5*input.size_mb,
         runtime='05:59:00',
     wrapper:
         "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
