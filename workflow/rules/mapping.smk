@@ -11,7 +11,7 @@ rule map_reads:
         sorting="samtools",
         sort_order="coordinate",
     resources:
-        runtime='02:59:00',
+        runtime=179,
         mem_mb=16000,
     threads: 8
     wrapper:
@@ -37,7 +37,7 @@ rule mark_duplicates:
         bams=lambda wc, input: list(map("--INPUT {}".format, [ input.bams ] if isinstance(input.bams, str) else input.bams)),
     resources:
         mem_mb=4096,
-        runtime='01:59:00',
+        runtime=119,
     script:
         "../scripts/picard_markduplicates.py"
 
@@ -57,7 +57,7 @@ rule calc_consensus_reads:
         extra="",
     resources:
         mem_mb=lambda wildcards, input: 1.5*input.size_mb,
-        runtime='05:59:00',
+        runtime=359,
     wrapper:
         "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
 
@@ -74,7 +74,7 @@ rule map_consensus_reads:
         sort="samtools",
         sort_order="coordinate",
     resources:
-        runtime='00:29:00',
+        runtime=29,
         mem_mb=9000,
     wildcard_constraints:
         read_type="pe|se",
@@ -141,7 +141,7 @@ rule recalibrate_base_qualities:
     threads: 8
     resources:
         mem_mb=1024,
-        runtime='00:59:00',
+        runtime=59,
     wrapper:
         "v1.21.1/bio/gatk/baserecalibratorspark"
 
@@ -164,7 +164,7 @@ rule apply_bqsr:
         java_opts="",  # optional
     resources:
         mem_mb=1024,
-        runtime='00:59:00',
+        runtime=59,
     wrapper:
         "v1.21.1/bio/gatk/applybqsr"
 
