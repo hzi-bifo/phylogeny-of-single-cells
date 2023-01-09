@@ -75,7 +75,7 @@ rule map_consensus_reads:
         sort_order="coordinate",
     resources:
         runtime=29,
-        mem_mb=9000,
+        mem_mb=12000,
     wildcard_constraints:
         read_type="pe|se",
     log:
@@ -107,6 +107,8 @@ rule sort_consensus_reads:
     log:
         "logs/samtools_sort/{sample}.log",
     threads: 8
+    resources:
+        mem_mb=lambda wildcards, threads: threads * 900
     wrapper:
         "v1.21.1/bio/samtools/sort"
 
