@@ -77,7 +77,7 @@ rule map_consensus_reads:
         sort_order="coordinate",
     resources:
         runtime=29,
-        mem_mb=12000,
+        mem_mb=16000,
     wildcard_constraints:
         read_type="pe|se",
     log:
