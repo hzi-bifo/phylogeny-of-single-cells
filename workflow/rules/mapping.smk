@@ -38,6 +38,8 @@ rule mark_duplicates:
     resources:
         mem_mb=4096,
         runtime=119,
+    # TODO: return to using wrapper, once this PR is propagated to the wrapper:
+    #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
     script:
         "../scripts/picard_markduplicates.py"
 
@@ -135,6 +137,8 @@ rule recalibrate_base_qualities:
         tbi="resources/variation.noiupac.vcf.gz.tbi",
     output:
         recal_table=temp("results/recal/{sample}.grp"),
+    conda:
+        "../envs/gatk.yaml"
     params:
         extra=config["gatk"]["baserecalibrator"],
         java_opts="-Xmx3278m",
@@ -144,8 +148,10 @@ rule recalibrate_base_qualities:
     resources:
         mem_mb=4096,
         runtime=59,
-    wrapper:
-        "v1.21.1/bio/gatk/baserecalibratorspark"
+    # TODO: return to using wrapper, once this PR is propagated to the wrapper:
+    #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
+    script:
+        "../scripts/gatk_baserecalibratorspark.py"
 
 
 rule apply_bqsr:
@@ -161,14 +167,18 @@ rule apply_bqsr:
         bai="results/recal/{sample}.sorted.bai",
     log:
         "logs/gatk/gatk_applybqsr/{sample}.log",
+    conda:
+        "../envs/gatk.yaml"
     params:
         extra=config["gatk"]["applybqsr"],  # optional
         java_opts="-Xmx3278m",
     resources:
         mem_mb=4096,
         runtime=59,
-    wrapper:
-        "v1.21.1/bio/gatk/applybqsr"
+    # TODO: return to using wrapper, once this PR is propagated to the wrapper:
+    #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
+    script:
+        "../scripts/gatk_applybqsr.py"
 
 
 rule merge_bulks:
