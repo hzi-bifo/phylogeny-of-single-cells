@@ -141,7 +141,7 @@ rule recalibrate_base_qualities:
         "../envs/gatk.yaml"
     params:
         extra=config["gatk"]["baserecalibrator"],
-        java_opts="-Xmx3278m",
+        java_opts="-Xmx3072m",
     log:
         "logs/gatk/baserecalibrator/{sample}.log",
     threads: 8
@@ -171,7 +171,7 @@ rule apply_bqsr:
         "../envs/gatk.yaml"
     params:
         extra=config["gatk"]["applybqsr"],  # optional
-        java_opts="-Xmx3278m",
+        java_opts="-Xmx3072m",
     resources:
         mem_mb=4096,
         runtime=59,
