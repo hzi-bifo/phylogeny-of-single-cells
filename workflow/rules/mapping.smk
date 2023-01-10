@@ -174,7 +174,7 @@ rule apply_bqsr:
         java_opts="-Xmx3072m",
     resources:
         mem_mb=4096,
-        runtime=59,
+        runtime=89,
     # TODO: return to using wrapper, once this PR is propagated to the wrapper:
     #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
     script:
