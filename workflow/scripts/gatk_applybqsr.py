@@ -17,5 +17,5 @@ with tempfile.TemporaryDirectory() as tmpdir:
         " --reference {reference}"
         " {extra}"
         " --tmp-dir {tmpdir}"
-        " --output {output} ) {log}"
+        " --output {snakemake.output.bam} ) {log}"
     )
