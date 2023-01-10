@@ -137,12 +137,12 @@ rule recalibrate_base_qualities:
         recal_table=temp("results/recal/{sample}.grp"),
     params:
         extra=config["gatk"]["baserecalibrator"],
-        java_opts="",
+        java_opts="-Xmx3278m",
     log:
         "logs/gatk/baserecalibrator/{sample}.log",
     threads: 8
     resources:
-        mem_mb=1024,
+        mem_mb=4096,
         runtime=59,
     wrapper:
         "v1.21.1/bio/gatk/baserecalibratorspark"
@@ -163,9 +163,9 @@ rule apply_bqsr:
         "logs/gatk/gatk_applybqsr/{sample}.log",
     params:
         extra=config["gatk"]["applybqsr"],  # optional
-        java_opts="",  # optional
+        java_opts="-Xmx3278m",
     resources:
-        mem_mb=1024,
+        mem_mb=4096,
         runtime=59,
     wrapper:
         "v1.21.1/bio/gatk/applybqsr"
