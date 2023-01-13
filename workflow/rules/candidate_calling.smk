@@ -48,7 +48,7 @@ rule freebayes_per_region:
         ),
     threads: 1
     resources:
-        runtime=lambda wildcards, attempt: (16 * attempt - 1) * 60 + 59,
+        runtime=lambda wildcards, attempt: (24 * attempt - 1) * 60 + 59,
         mem_mb=12000
     shell:
         "(freebayes {params.extra} -r {wildcards.region} -f {input.ref} {input.samples} | "
