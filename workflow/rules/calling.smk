@@ -13,7 +13,7 @@ rule prosolo_calling:
         extra="",
     threads: 1
     resources:
-        runtime=lambda wildcards, attempt: (4 * attempt - 1) * 60 + 59,
+        runtime=lambda wildcards, attempt: 6 * attempt * 60 - 1,
     log:
         "logs/prosolo/{individual}/{sc}.{region}.merged_bulk.prosolo.log",
     wrapper:
