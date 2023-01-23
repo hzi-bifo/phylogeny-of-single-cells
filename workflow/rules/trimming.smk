@@ -9,7 +9,7 @@ rule cutadapt:
         # https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types
         adapters=get_cutadapt_parameters,
     resources:
-        runtime=lambda wildcards, attempt: (attempt - 1) * 60 + 59,
+        runtime=lambda wildcards, attempt: 2 * attempt * 60 - 1,
     log:
         "logs/cutadapt/{sample}.{unit}.log",
     threads: 4  # set desired number of threads here

@@ -11,6 +11,8 @@ rule build_sample_regions:
     params:
         extra="--no-per-base",
         quantize="1:",
+    resources:
+        runtime=lambda wc, attempt: attempt * 30 - 1,
     wrapper:
         "v1.21.1/bio/mosdepth"
 

@@ -101,6 +101,8 @@ rule get_known_variants:
         release=config["ref"]["release"],
         build=config["ref"]["build"],
         type="all",
+    resources:
+        runtime=lambda wc, attempt: attempt * 40 - 1,
     cache: True
     wrapper:
         "v1.21.1/bio/reference/ensembl-variation"
@@ -114,7 +116,7 @@ rule remove_iupac_codes:
     log:
         "logs/rbt/remove_iupac_codes.log",
     resources:
-        runtime=59,
+        runtime=lambda wc, attempt: attempt * 80 - 1,
     conda:
         "../envs/rbt.yaml"
     cache: True

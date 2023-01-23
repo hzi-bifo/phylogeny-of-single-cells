@@ -147,7 +147,7 @@ rule recalibrate_base_qualities:
     threads: 8
     resources:
         mem_mb=4096,
-        runtime=59,
+        runtime=lambda wc, attempt: attempt * 90 - 1,
     # TODO: return to using wrapper, once this PR is propagated to the wrapper:
     #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
     script:
