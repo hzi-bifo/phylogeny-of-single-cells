@@ -63,6 +63,8 @@ rule bcftools_norm_candidate_calls:
         "logs/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
     conda:
         "../envs/bcftools.yaml"
+    resources:
+        runtime=lambda wildcards, attempt: 40 * attempt - 1,
     shell:
         # TODO: turn off the following atomize and instead activate --do-not-normalize
         # once the ProSolo model ist re-integrated with varlociraptor

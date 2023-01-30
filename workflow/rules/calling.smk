@@ -31,6 +31,7 @@ rule sort_calls:
         "../envs/bcftools.yaml"
     resources:
         mem_mb=4000,
+        runtime=lambda wildcards, attempt: 40 * attempt - 1,
     shell:
         "bcftools sort --max-mem {resources.mem_mb}M --temp-dir `mktemp -d` "
         "-Ob {input} > {output} 2> {log}"
@@ -45,6 +46,8 @@ rule bcftools_index_region_calls:
         "logs/bcftools_index/{individual}/{sc}/{region}.merged_bulk.prosolo.sorted.log",
     conda:
         "../envs/bcftools.yaml"
+    resources:
+        runtime=lambda wildcards, attempt: 40 * attempt - 1,
     shell:
         "bcftools index {input} 2> {log}"
 
