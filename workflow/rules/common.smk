@@ -175,22 +175,13 @@ def aggregate_freebayes_region_calls_input(ext=".bcf"):
     return inner
 
 
-def aggregate_prosolo_region_calls_input(ext=".bcf"):
-    def inner(wildcards):
-        # decision based on content of output file
-        # Important: use the method open() of the returned file!
-        # This way, Snakemake is able to automatically download the file if it is generated in
-        # a cloud environment without a shared filesystem.
-        with checkpoints.create_freebayes_regions.get(individual=wildcards.individual).output[0].open() as f:
-            return expand(
-                    "results/calls/{ind}/{sc}/{region}.merged_bulk.prosolo.sorted{ext}",
-                    ind=wildcards.individual,
-                    sc=wildcards.sc,
-                    region=[region.strip() for region in f],
-                    ext=ext
-                )
-    
-    return inner
+def get_all_raxml_gts_for_individual(wildcards):
+    single_cells = samples.loc[(samples["individual"] == wildcards.individual) & (samples["sample_type"] == "single_cell"), "sample_name"]
+    return expand(
+        "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv",
+        individual=wildcards.individual,
+        sc=single_cells,
+    )
 
 
 def get_all_gts_for_individual(wildcards):
@@ -220,3 +211,29 @@ def get_read_group(wildcards):
     return r"-R '@RG\tID:{sample}\tSM:{sample}\tPL:{platform}'".format(
         sample=wildcards.sample, platform=samples.loc[wildcards.sample, "platform"]
     )
+
+
+def get_raxml_ng_mem_mb(wildcards, input):
+    with open(input.log) as log:
+        for line in log:
+            if line.startswith('* Estimated memory requirements                : '):
+                m = re.search(r"* Estimated memory requirements                : (\d+) MB", line)
+                return int(m.group(0)) + 1000
+
+
+def get_raxml_ng_prefix(wildcards, output):
+    return path.join(
+        path.dirname(output[0]),
+        path.basename(output[0]).rsplit(".raxml.")[0]
+    )
+
+
+def get_raxml_ng_threads(wildcards, input):
+    with open(input.log) as log:
+        for line in log:
+            if line.startswith('* Recommended number of threads / MPI processes: '):
+                m = re.search(r"* Recommended number of threads / MPI processes: (\d+)", line)
+                return int(m.group(0))
+
+
+

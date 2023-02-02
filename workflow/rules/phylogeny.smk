@@ -2,9 +2,9 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
     input:
         "results/genotype_fdr/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.bcf",
     output:
-        "results/raxml_ng/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv"
+        "results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv"
     log:
-        "logs/raxml_ng/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log"
     conda:
         "../envs/vembrane_vlr_bcftools.yaml"
     shell:
@@ -20,13 +20,13 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
 
 rule merge_raxml_ng_genotypes_per_cell:
     input:
-        hom_ref="results/raxml_ng/{individual}/per_genotype/{sc}.hom_ref.genotype_likelihoods.tsv",
-        het="results/raxml_ng/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
-        hom_alt="results/raxml_ng/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
+        hom_ref="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_ref.genotype_likelihoods.tsv",
+        het="results/raxml_ng_input/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
+        hom_alt="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
     output:
-        "results/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv"
+        "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv"
     log:
-        "logs/raxml_ng/{individual}/{sc}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.log"
     conda:
         "../envs/tidyverse.yaml"
     script:
@@ -35,13 +35,94 @@ rule merge_raxml_ng_genotypes_per_cell:
 
 rule merge_raxml_ng_genotypes_per_individual:
     input:
-        get_all_gts_for_individual,
+        get_all_raxml_gts_for_individual,
     output:
-        "results/raxml_ng/{individual}.genotype_likelihoods.tsv"
+        "results/raxml_ng_input/{individual}.genotype_likelihoods.tsv",
     log:
-        "logs/raxml_ng/{individual}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}.genotype_likelihoods.log"
     conda:
         "../envs/tidyverse.yaml"
     script:
         "../scripts/merge_raxml_ng_genotypes_per_individual.R"
+
+
+rule raxml_ng_parse:
+    input:
+        msa="results/raxml_ng_input/{individual}.genotype_likelihoods.tsv",
+    output:
+        rba="results/raxml_ng_parse/{individual}.raxml.rba",
+        log="logs/raxml_ng_parse/{individual}.raxml.log",
+    log:
+        "logs/raxml_ng_parse/{individual}.raxml.error.log"
+    conda:
+        "../envs/raxml_ng.yaml"
+    params:
+        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        prefix=get_raxml_ng_prefix,
+    shell:
+        "raxml-ng --parse --msa {input.msa} --model {params.model} --prefix {params.prefix} 2>{log}"
+
+
+rule raxml_ng:
+    input:        
+        rba="results/raxml_ng_parse/{individual}.raxml.rba",
+        log="logs/raxml_ng_parse/{individual}.raxml.log",
+    output:
+        best_tree="results/raxml_ng/{individual}.raxml.bestTree",
+        best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed",
+        best_model="results/raxml_ng/{individual}.raxml.bestModel",
+        bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
+        start_trees="results/raxml_ng/{individual}.raxml.startTree",
+        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees",
+    log:
+        "logs/raxml_ng/{individual}.raxml.error.log",
+    conda:
+        "../envs/raxml_ng.yaml"
+    params:
+        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        prefix=get_raxml_ng_prefix,
+    threads: get_raxml_ng_threads
+    resources:
+        mem_mb=get_raxml_ng_mem_mb,
+    shell:
+        "raxml-ng --all --msa {input.rsa} --model {params.model} --prefix {params.prefix} --threads {threads} --tree pars{{50}},rand{{50}} 2>{log}"
+
+
+rule raxml_ng_support:
+    input:        
+        best_tree="results/raxml_ng/{individual}.raxml.bestTree",
+        bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
+    output:
+        support="results/raxml_ng_support/{individual}.raxml.support",
+    log:
+        "logs/raxml_ng_support/{individual}.raxml.error.log",
+    conda:
+        "../envs/raxml_ng.yaml"
+    params:
+        prefix=get_raxml_ng_prefix,
+    shell:
+        "raxml-ng --support --tree {input.best_tree} --bs-trees {input.bootstraps} --prefix {params.prefix} 2>{log}"
+
+
+rule raxml_ng_ancestral:
+    input:        
+        rba="results/raxml_ng_parse/{individual}.raxml.rba",
+        best_tree="results/raxml_ng/{individual}.raxml.bestTree",
+        log="logs/raxml_ng_parse/{individual}.raxml.log",
+    output:
+        ancestral_tree="results/raxml_ng_ancestral/{individual}.raxml.ancestralTree",
+        ancestral_states="results/raxml_ng_ancestral/{individual}.raxml.ancestralStates",
+        ancestral_probs="results/raxml_ng_ancestral/{individual}.raxml.ancestralProbs",
+    log:
+        "logs/raxml_ng_ancestral/{individual}.raxml.error.log",
+    conda:
+        "../envs/raxml_ng.yaml"
+    params:
+        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        prefix=get_raxml_ng_prefix,
+    threads: get_raxml_ng_threads
+    resources:
+        mem_mb=get_raxml_ng_mem_mb,
+    shell:
+        "raxml-ng --ancestral --msa {input.rba} --tree {input.best_tree} --model {params.model} --prefix {params.prefix} --threads {threads} 2>{log}"
 

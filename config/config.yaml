@@ -31,3 +31,6 @@ gatk:
 
 picard:
   markduplicates: "--VALIDATION_STRINGENCY LENIENT"
+
+raxml_ng:
+  model: "GTGTR+FO"
