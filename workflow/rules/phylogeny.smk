@@ -57,7 +57,7 @@ rule raxml_ng_parse:
     conda:
         "../envs/raxml_ng.yaml"
     params:
-        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
     shell:
         "raxml-ng --parse --msa {input.msa} --model {params.model} --prefix {params.prefix} 2>{log}"
@@ -79,7 +79,7 @@ rule raxml_ng:
     conda:
         "../envs/raxml_ng.yaml"
     params:
-        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
     threads: get_raxml_ng_threads
     resources:
@@ -118,7 +118,7 @@ rule raxml_ng_ancestral:
     conda:
         "../envs/raxml_ng.yaml"
     params:
-        model=config["raxml_ng"].get(model, "GTGTR+FO"),
+        model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
     threads: get_raxml_ng_threads
     resources:
