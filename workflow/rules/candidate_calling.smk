@@ -17,7 +17,7 @@ checkpoint create_freebayes_regions:
         "     <(fasta_generate_regions.py {input.ref}.fai {params.chunksize} )"
         "    ) "
         "   -b {input.regions} | "
-        r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/:\1-\2/' > {output}"
+        r" sed 's/\t\([0-9]*\)\t\([0-9]*\)$/\/\1-\2/' > {output}"
         "  ) 2> {log} "
 
 
@@ -35,9 +35,9 @@ rule freebayes_per_region:
             sample=get_individual_samples(w.individual),
         ),
     output:
-        "results/candidate-calls/{individual}.{region}.freebayes.bcf",
+        "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.bcf",
     log:
-        "logs/freebayes/{individual}.{region}.log",
+        "logs/freebayes/{individual}/{chromosome}/{region}.log",
     conda:
         "../envs/freebayes.yaml"
     params:
@@ -48,23 +48,23 @@ rule freebayes_per_region:
         ),
     threads: 1
     resources:
-        runtime=lambda wildcards, attempt: 48 * attempt * 60 - 1,
-        mem_mb=lambda wc, attempt: 24000 * attempt,
+        runtime=lambda wildcards, attempt: 24 * attempt * 60 - 1,
+        mem_mb=lambda wc, attempt: 8000 + 16000 * attempt,
     shell:
-        "(freebayes {params.extra} -r {wildcards.region} -f {input.ref} {input.samples} | "
+        "(freebayes {params.extra} -r {wildcards.chromosome}:{wildcards.region} -f {input.ref} {input.samples} | "
         " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
 
 rule bcftools_norm_candidate_calls:
     input:
-        "results/candidate-calls/{individual}.{region}.freebayes.bcf",
+        "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.bcf",
     output:
-        "results/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
+        "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.norm.bcf",
     log:
-        "logs/candidate-calls/{individual}.{region}.freebayes.norm.bcf",
+        "logs/candidate_calls/{individual}/{chromosome}/{region}.freebayes.norm.bcf",
     conda:
         "../envs/bcftools.yaml"
     resources:
-        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        runtime=lambda wildcards, attempt: 30 * attempt - 1,
     shell:
         # TODO: turn off the following atomize and instead activate --do-not-normalize
         # once the ProSolo model ist re-integrated with varlociraptor
@@ -73,3 +73,18 @@ rule bcftools_norm_candidate_calls:
         # varlociraptor
         "  bcftools view -O b -o {output} --types snps"
         ") 2>{log}"
+
+
+rule aggregate_freebayes_region_calls:
+    input:
+        calls=aggregate_freebayes_region_calls_input(),
+        indexes=aggregate_freebayes_region_calls_input(ext=".bcf.csi"),
+    output:
+        "results/candidate_calls/{individual}.freebayes.norm.bcf",
+    log:
+        "logs/candidate_calls/{individual}.freebayes.norm.log",
+    params:
+        extra="-a",
+    wrapper:
+        "v1.21.1/bio/bcftools/concat"
+

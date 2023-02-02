@@ -158,6 +158,23 @@ def get_individual_bulk_samples_bam(wildcards):
     return expand("results/recal/{b}.sorted.bam", b=bulk_samples)
 
 
+def aggregate_freebayes_region_calls_input(ext=".bcf"):
+    def inner(wildcards):
+        # decision based on content of output file
+        # Important: use the method open() of the returned file!
+        # This way, Snakemake is able to automatically download the file if it is generated in
+        # a cloud environment without a shared filesystem.
+        with checkpoints.create_freebayes_regions.get(individual=wildcards.individual).output[0].open() as f:
+            return expand(
+                    "results/candidate_calls/{ind}/{chr_and_region}.freebayes.norm{ext}",
+                    ind=wildcards.individual,
+                    chr_and_region=[chr_and_region.strip() for chr_and_region in f],
+                    ext=ext
+                )
+    
+    return inner
+
+
 def aggregate_prosolo_region_calls_input(ext=".bcf"):
     def inner(wildcards):
         # decision based on content of output file
