@@ -80,6 +80,8 @@ def get_final_output():
             )
         )
     final_output.append("results/qc/multiqc.html")
+
+
 #
 #    for sample, unit in units.index:
 #        row = units.loc[sample].loc[unit]
@@ -165,19 +167,25 @@ def aggregate_freebayes_region_calls_input(ext=".bcf"):
         # Important: use the method open() of the returned file!
         # This way, Snakemake is able to automatically download the file if it is generated in
         # a cloud environment without a shared filesystem.
-        with checkpoints.create_freebayes_regions.get(individual=wildcards.individual).output[0].open() as f:
+        with checkpoints.create_freebayes_regions.get(
+            individual=wildcards.individual
+        ).output[0].open() as f:
             return expand(
-                    "results/candidate_calls/{ind}/{chr_and_region}.freebayes.norm{ext}",
-                    ind=wildcards.individual,
-                    chr_and_region=[chr_and_region.strip() for chr_and_region in f],
-                    ext=ext
-                )
-    
+                "results/candidate_calls/{ind}/{chr_and_region}.freebayes.norm{ext}",
+                ind=wildcards.individual,
+                chr_and_region=[chr_and_region.strip() for chr_and_region in f],
+                ext=ext,
+            )
+
     return inner
 
 
 def get_all_raxml_gts_for_individual(wildcards):
-    single_cells = samples.loc[(samples["individual"] == wildcards.individual) & (samples["sample_type"] == "single_cell"), "sample_name"]
+    single_cells = samples.loc[
+        (samples["individual"] == wildcards.individual)
+        & (samples["sample_type"] == "single_cell"),
+        "sample_name",
+    ]
     return expand(
         "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv",
         individual=wildcards.individual,
@@ -186,7 +194,11 @@ def get_all_raxml_gts_for_individual(wildcards):
 
 
 def get_all_scelestial_gts_for_individual(wildcards):
-    single_cells = samples.loc[(samples["individual"] == wildcards.individual) & (samples["sample_type"] == "single_cell"), "sample_name"]
+    single_cells = samples.loc[
+        (samples["individual"] == wildcards.individual)
+        & (samples["sample_type"] == "single_cell"),
+        "sample_name",
+    ]
     return expand(
         "results/scelestial/{individual}/{sc}.all_genotypes.tsv",
         individual=wildcards.individual,
@@ -218,24 +230,24 @@ def get_read_group(wildcards):
 def get_raxml_ng_mem_mb(wildcards, input):
     with open(input.log) as log:
         for line in log:
-            if line.startswith('* Estimated memory requirements                : '):
-                m = re.search(r"* Estimated memory requirements                : (\d+) MB", line)
+            if line.startswith("* Estimated memory requirements                : "):
+                m = re.search(
+                    r"* Estimated memory requirements                : (\d+) MB", line
+                )
                 return int(m.group(0)) + 1000
 
 
 def get_raxml_ng_prefix(wildcards, output):
     return path.join(
-        path.dirname(output[0]),
-        path.basename(output[0]).rsplit(".raxml.")[0]
+        path.dirname(output[0]), path.basename(output[0]).rsplit(".raxml.")[0]
     )
 
 
 def get_raxml_ng_threads(wildcards, input):
     with open(input.log) as log:
         for line in log:
-            if line.startswith('* Recommended number of threads / MPI processes: '):
-                m = re.search(r"* Recommended number of threads / MPI processes: (\d+)", line)
+            if line.startswith("* Recommended number of threads / MPI processes: "):
+                m = re.search(
+                    r"* Recommended number of threads / MPI processes: (\d+)", line
+                )
                 return int(m.group(0))
-
-
-

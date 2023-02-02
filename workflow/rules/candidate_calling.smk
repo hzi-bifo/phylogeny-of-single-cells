@@ -4,13 +4,13 @@ checkpoint create_freebayes_regions:
         ref_idx="resources/reference/full_reference.fa.fai",
         regions="results/regions/{individual}.covered_regions.filtered.bed",
     output:
-        "results/regions/{individual}.freebayes_regions.bed"
+        "results/regions/{individual}.freebayes_regions.bed",
     log:
-        "logs/regions/{individual}.freebayes_regions.log"
+        "logs/regions/{individual}.freebayes_regions.log",
     conda:
         "../envs/freebayes.yaml"
     params:
-        chunksize=lambda w: config["freebayes"]["chunksize"]
+        chunksize=lambda w: config["freebayes"]["chunksize"],
     shell:
         "( bedtools intersect -a "
         r"  <(sed 's/:\([0-9]*\)-\([0-9]*\)$/\t\1\t\2/' "
@@ -54,6 +54,7 @@ rule freebayes_per_region:
         "(freebayes {params.extra} -r {wildcards.chromosome}:{wildcards.region} -f {input.ref} {input.samples} | "
         " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
 
+
 rule bcftools_norm_candidate_calls:
     input:
         "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.bcf",
@@ -68,9 +69,9 @@ rule bcftools_norm_candidate_calls:
     shell:
         # TODO: turn off the following atomize and instead activate --do-not-normalize
         # once the ProSolo model ist re-integrated with varlociraptor
-        "( bcftools norm --multiallelics -any --atomize {input} |"
         # TODO: turn off the following filter to snps once ProSolo is integrated with
         # varlociraptor
+        "( bcftools norm --multiallelics -any --atomize {input} |"
         "  bcftools view -O b -o {output} --types snps"
         ") 2>{log}"
 
@@ -87,4 +88,3 @@ rule aggregate_freebayes_region_calls:
         extra="-a",
     wrapper:
         "v1.21.1/bio/bcftools/concat"
-

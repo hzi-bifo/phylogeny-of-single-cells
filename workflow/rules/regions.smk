@@ -30,7 +30,7 @@ rule merge_individual_regions:
     conda:
         "../envs/bedtools.yaml"
     resources:
-        runtime=59
+        runtime=59,
     shell:
         "zcat {input} | sort -k1,1 -k2,2n - | mergeBed -i - -d 15000 > {output} 2> {log}"
 

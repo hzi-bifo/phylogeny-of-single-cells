@@ -2,18 +2,18 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
     input:
         "results/genotype_fdr/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.bcf",
     output:
-        "results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv"
+        "results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv",
     log:
-        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log",
     conda:
         "../envs/vembrane_vlr_bcftools.yaml"
     shell:
         "( varlociraptor decode-phred < {input} |"
         "  vembrane table "
         "    --header 'CHROM, POS, REF, ALT, HOM_REF, HET, HOM_ALT' "
-        "    'CHROM, POS, REF, ALT, INFO[\"PROB_HOM_REF\"] + INFO[\"PROB_ERR_ALT\"], "
-        "     INFO[\"PROB_ADO_TO_ALT\"] + INFO[\"PROB_HET\"] + INFO[\"PROB_ADO_TO_REF\"], "
-        "     INFO[\"PROB_HOM_ALT\"] + INFO[\"PROB_ERR_REF\"]' "
+        '    \'CHROM, POS, REF, ALT, INFO["PROB_HOM_REF"] + INFO["PROB_ERR_ALT"], '
+        '     INFO["PROB_ADO_TO_ALT"] + INFO["PROB_HET"] + INFO["PROB_ADO_TO_REF"], '
+        '     INFO["PROB_HOM_ALT"] + INFO["PROB_ERR_REF"]\' '
         "  >{output}"
         ") 2> {log}"
 
@@ -24,9 +24,9 @@ rule merge_raxml_ng_genotypes_per_cell:
         het="results/raxml_ng_input/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
         hom_alt="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
     output:
-        "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv"
+        "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv",
     log:
-        "logs/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.log",
     conda:
         "../envs/tidyverse.yaml"
     script:
@@ -39,7 +39,7 @@ rule merge_raxml_ng_genotypes_per_individual:
     output:
         "results/raxml_ng_input/{individual}.genotype_likelihoods.tsv",
     log:
-        "logs/raxml_ng_input/{individual}.genotype_likelihoods.log"
+        "logs/raxml_ng_input/{individual}.genotype_likelihoods.log",
     conda:
         "../envs/tidyverse.yaml"
     script:
@@ -53,7 +53,7 @@ rule raxml_ng_parse:
         rba="results/raxml_ng_parse/{individual}.raxml.rba",
         log="logs/raxml_ng_parse/{individual}.raxml.log",
     log:
-        "logs/raxml_ng_parse/{individual}.raxml.error.log"
+        "logs/raxml_ng_parse/{individual}.raxml.error.log",
     conda:
         "../envs/raxml_ng.yaml"
     params:
@@ -64,7 +64,7 @@ rule raxml_ng_parse:
 
 
 rule raxml_ng:
-    input:        
+    input:
         rba="results/raxml_ng_parse/{individual}.raxml.rba",
         log="logs/raxml_ng_parse/{individual}.raxml.log",
     output:
@@ -89,7 +89,7 @@ rule raxml_ng:
 
 
 rule raxml_ng_support:
-    input:        
+    input:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
         bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
     output:
@@ -105,7 +105,7 @@ rule raxml_ng_support:
 
 
 rule raxml_ng_ancestral:
-    input:        
+    input:
         rba="results/raxml_ng_parse/{individual}.raxml.rba",
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
         log="logs/raxml_ng_parse/{individual}.raxml.log",
@@ -131,9 +131,9 @@ rule prosolo_probs_to_scelestial_genotypes_per_cell:
     input:
         "results/genotype_fdr/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.bcf",
     output:
-        "results/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.tsv"
+        "results/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.tsv",
     log:
-        "logs/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.log"
+        "logs/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.log",
     conda:
         "../envs/vembrane_vlr_bcftools.yaml"
     shell:
@@ -165,7 +165,7 @@ rule merge_scelestial_genotypes_per_individual:
     output:
         "results/scelestial/{individual}.genotypes.txt",
     log:
-        "logs/scelestial/{individual}.genotypes.log"
+        "logs/scelestial/{individual}.genotypes.log",
     conda:
         "../envs/tidyverse.yaml"
     script:
@@ -178,7 +178,7 @@ rule scelestial:
     output:
         "results/scelestial/{individual}.tree.txt",
     log:
-        "logs/scelestial/{individual}.tree.log"
+        "logs/scelestial/{individual}.tree.log",
     conda:
         "../envs/scelestial.yaml"
     shell:

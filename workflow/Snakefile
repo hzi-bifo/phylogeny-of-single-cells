@@ -9,8 +9,10 @@ min_version("7.20")
 
 configfile: "config/config.yaml"
 
+
 scattergather:
-    prosolo_chunks=1000
+    prosolo_chunks=1000,
+
 
 include: "rules/common.smk"
 include: "rules/trimming.smk"

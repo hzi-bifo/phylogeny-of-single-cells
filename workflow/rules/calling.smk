@@ -2,16 +2,18 @@ rule scatter_candidate_calls:
     input:
         "results/candidate_calls/{individual}.freebayes.norm.bcf",
     output:
-        scatter.prosolo_chunks("results/candidate_calls/prosolo_chunks/{individual}/{scatteritem}.candidate_calls.bcf"),
+        scatter.prosolo_chunks(
+            "results/candidate_calls/prosolo_chunks/{individual}/{scatteritem}.candidate_calls.bcf"
+        ),
     log:
-        "logs/candidate_calls/prosolo_chunks/{individual}.scatter.candidate_calls.log"
+        "logs/candidate_calls/prosolo_chunks/{individual}.scatter.candidate_calls.log",
     conda:
         "../envs/rbt.yaml"
     resources:
         runtime=lambda wildcards, attempt: attempt * 30 - 1,
     shell:
         "rbt vcf-split {input} {output}"
-    
+
 
 rule prosolo_calling:
     input:
@@ -39,7 +41,9 @@ rule sort_calls:
     input:
         "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.bcf",
     output:
-        temp("results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"),
+        temp(
+            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
+        ),
     log:
         "logs/bcf-sort/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.log",
     conda:
@@ -56,7 +60,9 @@ rule bcftools_index_region_calls:
     input:
         "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf",
     output:
-        temp("results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"),
+        temp(
+            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
+        ),
     log:
         "logs/bcftools_index/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.log",
     conda:
@@ -69,8 +75,12 @@ rule bcftools_index_region_calls:
 
 rule aggregate_prosolo_chunk_calls:
     input:
-        calls=gather.prosolo_chunks("results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"),
-        indexes=gather.prosolo_chunks("results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"),
+        calls=gather.prosolo_chunks(
+            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
+        ),
+        indexes=gather.prosolo_chunks(
+            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
+        ),
     output:
         "results/calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
     log:
@@ -94,13 +104,15 @@ rule prosolo_control_fdr:
     params:
         # comma-separated set of events for whose (joint)
         # false discovery rate you want to control
-        events = lambda wc:
-            "ADO_TO_ALT,ADO_TO_REF,HET" if wc.genotype == "het" else
-            "HOM_ALT,ERR_REF" if wc.genotype == "hom_alt" else
-            "HOM_REF,ERR_ALT" if wc.genotype == "hom_ref" else
-            "ONLY-USE-het-hom_alt-or-hom_ref-for-genotype",
+        events=lambda wc: "ADO_TO_ALT,ADO_TO_REF,HET"
+        if wc.genotype == "het"
+        else "HOM_ALT,ERR_REF"
+        if wc.genotype == "hom_alt"
+        else "HOM_REF,ERR_ALT"
+        if wc.genotype == "hom_ref"
+        else "ONLY-USE-het-hom_alt-or-hom_ref-for-genotype",
         # false discovery rate to control for
-        fdr = 0.25
+        fdr=0.25,
     log:
         "logs/final_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.log",
     wrapper:
