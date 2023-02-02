@@ -126,3 +126,60 @@ rule raxml_ng_ancestral:
     shell:
         "raxml-ng --ancestral --msa {input.rba} --tree {input.best_tree} --model {params.model} --prefix {params.prefix} --threads {threads} 2>{log}"
 
+
+rule prosolo_probs_to_scelestial_genotypes_per_cell:
+    input:
+        "results/genotype_fdr/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.bcf",
+    output:
+        "results/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.tsv"
+    log:
+        "logs/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.log"
+    conda:
+        "../envs/vembrane_vlr_bcftools.yaml"
+    shell:
+        "vembrane table "
+        "  --header 'position, REF, ALT "
+        "  'f\"{CHROM}:{POS}\", REF, ALT' "
+        ">{output} "
+        "2> {log} "
+
+
+rule merge_scelestial_genotypes_per_cell:
+    input:
+        hom_ref="results/scelestial/{individual}/per_genotype/{sc}.hom_ref.genotypes.tsv",
+        het="results/scelestial/{individual}/per_genotype/{sc}.het.genotypes.tsv",
+        hom_alt="results/scelestial/{individual}/per_genotype/{sc}.hom_alt.genotypes.tsv",
+    output:
+        "results/scelestial/{individual}/{sc}.all_genotypes.tsv",
+    log:
+        "logs/scelestial/{individual}/{sc}.all_genotypes.log",
+    conda:
+        "../envs/tidyverse.yaml"
+    script:
+        "../scripts/merge_scelestial_genotypes_per_cell.R"
+
+
+rule merge_scelestial_genotypes_per_individual:
+    input:
+        get_all_scelestial_gts_for_individual,
+    output:
+        "results/scelestial/{individual}.genotypes.txt",
+    log:
+        "logs/scelestial/{individual}.genotypes.log"
+    conda:
+        "../envs/tidyverse.yaml"
+    script:
+        "../scripts/merge_scelestial_genotypes_per_individual.R"
+
+
+rule scelestial:
+    input:
+        "results/scelestial/{individual}.genotypes.txt",
+    output:
+        "results/scelestial/{individual}.tree.txt",
+    log:
+        "logs/scelestial/{individual}.tree.log"
+    conda:
+        "../envs/scelestial.yaml"
+    shell:
+        "scelestial <{input} >{output} 2>{log}"

@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 from os import path
 from tempfile import TemporaryDirectory
 
@@ -184,13 +185,14 @@ def get_all_raxml_gts_for_individual(wildcards):
     )
 
 
-def get_all_gts_for_individual(wildcards):
+def get_all_scelestial_gts_for_individual(wildcards):
     single_cells = samples.loc[(samples["individual"] == wildcards.individual) & (samples["sample_type"] == "single_cell"), "sample_name"]
     return expand(
-        "results/raxml_ng/{individual}/{sc}.genotype_likelihoods.tsv",
+        "results/scelestial/{individual}/{sc}.all_genotypes.tsv",
         individual=wildcards.individual,
         sc=single_cells,
     )
+
 
 #### params functions
 
