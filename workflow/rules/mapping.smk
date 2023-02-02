@@ -22,7 +22,7 @@ rule mark_duplicates:
     input:
         bams="results/mapped/{sample}.sorted.bam",
     output:
-        bam=temp("results/markdup/{sample}.sorted.bam"),
+        bam="results/markdup/{sample}.sorted.bam",
         metrics="results/qc/markdup/{sample}.metrics.txt",
     log:
         "logs/picard/markdup/{sample}.log",
