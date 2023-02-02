@@ -3,7 +3,7 @@ rule scatter_candidate_calls:
         "results/candidate_calls/{individual}.freebayes.norm.bcf",
     output:
         scatter.prosolo_chunks(
-            "results/candidate_calls/prosolo_chunks/{individual}/{scatteritem}.candidate_calls.bcf"
+            "results/candidate_calls/prosolo_chunks/{{individual}}/{scatteritem}.candidate_calls.bcf"
         ),
     log:
         "logs/candidate_calls/prosolo_chunks/{individual}.scatter.candidate_calls.log",
