@@ -44,92 +44,10 @@ rule mark_duplicates:
         "../scripts/picard_markduplicates.py"
 
 
-
-rule calc_consensus_reads:
-    input:
-        "results/markdup/{sample}.sorted.bam",
-    output:
-        consensus_r1=temp("results/consensus/fastq/{sample}.1.fq"),
-        consensus_r2=temp("results/consensus/fastq/{sample}.2.fq"),
-        consensus_se=temp("results/consensus/fastq/{sample}.se.fq"),
-        skipped=temp("results/consensus/{sample}.skipped.bam"),
-    log:
-        "logs/consensus/{sample}.log",
-    params:
-        extra="",
-    resources:
-        mem_mb=lambda wildcards, input: 1.5*input.size_mb,
-        runtime=359,
-    wrapper:
-        "v1.21.1/bio/rbt/collapse_reads_to_fragments-bam"
-
-
-rule map_consensus_reads:
-    input:
-        reads=get_processed_consensus_input,
-        idx=rules.bwa_index.output,
-    output:
-        temp("results/consensus/{sample}.consensus.{read_type}.mapped.bam"),
-    params:
-        index=lambda w, input: os.path.splitext(input.idx[0])[0],
-        extra=lambda w: "-C {}".format(get_read_group(w)),
-        sort="samtools",
-        sort_order="coordinate",
-    resources:
-        runtime=29,
-        mem_mb=16000,
-    wildcard_constraints:
-        read_type="pe|se",
-    log:
-        "logs/bwa_mem/{sample}.{read_type}.consensus.log",
-    threads: 8
-    wrapper:
-        "v1.21.1/bio/bwa/mem"
-
-
-rule merge_consensus_reads:
-    input:
-        "results/consensus/{sample}.skipped.bam",
-        "results/consensus/{sample}.consensus.se.mapped.bam",
-        "results/consensus/{sample}.consensus.pe.mapped.bam",
-    output:
-        temp("results/consensus/{sample}.merged.bam"),
-    log:
-        "logs/samtools_merge/{sample}.log",
-    threads: 8
-    wrapper:
-        "v1.21.1/bio/samtools/merge"
-
-
-rule sort_consensus_reads:
-    input:
-        "results/consensus/{sample}.merged.bam",
-    output:
-        temp("results/consensus/{sample}.sorted.bam"),
-    log:
-        "logs/samtools_sort/{sample}.log",
-    threads: 8
-    resources:
-        mem_mb=lambda wildcards, threads: threads * 900
-    wrapper:
-        "v1.21.1/bio/samtools/sort"
-
-
-rule bam_index_consensus:
-    input:
-        "results/consensus/{sample}.sorted.bam",
-    output:
-        temp("results/consensus/{sample}.sorted.bai"),
-    log:
-        "logs/bam_index/consensus/{sample}.sorted.log",
-    wrapper:
-        "v1.21.1/bio/samtools/index"
-
-
 rule recalibrate_base_qualities:
     input:
-        bam="results/consensus/{sample}.sorted.bam",
-        bai="results/consensus/{sample}.sorted.bai",
+        bam="results/markdup/{sample}.sorted.bam",
+        bai="results/markdup/{sample}.sorted.bai",
         ref=rules.create_full_reference.output,
         ref_dict=rules.full_reference_dict.output,
         ref_fai=rules.full_reference_faidx.output,
