@@ -74,8 +74,8 @@ rule recalibrate_base_qualities:
 
 rule apply_bqsr:
     input:
-        bam="results/consensus/{sample}.sorted.bam",
-        bai="results/consensus/{sample}.sorted.bai",
+        bam="results/markdup/{sample}.sorted.bam",
+        bai="results/markdup/{sample}.sorted.bai",
         ref=rules.create_full_reference.output,
         ref_dict=rules.full_reference_dict.output,
         ref_fai=rules.full_reference_faidx.output,
