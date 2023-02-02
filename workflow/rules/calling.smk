@@ -76,10 +76,10 @@ rule bcftools_index_region_calls:
 rule aggregate_prosolo_chunk_calls:
     input:
         calls=gather.prosolo_chunks(
-            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
+            "results/calls/{{individual}}/{{sc}}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
         ),
         indexes=gather.prosolo_chunks(
-            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
+            "results/calls/{{individual}}/{{sc}}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
         ),
     output:
         "results/calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
