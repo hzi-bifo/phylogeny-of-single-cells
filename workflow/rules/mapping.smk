@@ -49,6 +49,20 @@ rule mark_duplicates:
         "../scripts/picard_markduplicates.py"
 
 
+rule samtools_index_markdup:
+    input:
+        "results/markdup/{sample}.sorted.bam",
+    output:
+        "results/markdup/{sample}.sorted.bai",
+    log:
+        "logs/markdup/{sample}.sorted.bai",
+    params:
+        extra="",  # optional params string
+    threads: 4  # This value - 1 will be sent to -@
+    wrapper:
+        "v1.22.0/bio/samtools/index"
+
+
 rule recalibrate_base_qualities:
     input:
         bam="results/markdup/{sample}.sorted.bam",
