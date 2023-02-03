@@ -128,6 +128,8 @@ rule merge_bulks:
     params:
         extra="",  # optional additional parameters as string
     threads: 8
+    resources:
+        runtime=lambda wildcards, attempt: 40 * attempt - 1,
     wrapper:
         "v1.21.1/bio/samtools/merge"
 
@@ -139,5 +141,7 @@ rule bam_index_merged_bulks:
         "results/recal/{individual}.merged_bulk.sorted.bai",
     log:
         "logs/bam_index/merged_bulks/{individual}.merged_bulk.sorted.log",
+    resources:
+        runtime=lambda wildcards, attempt: 60 * attempt - 1,
     wrapper:
         "v1.21.1/bio/samtools/index"
