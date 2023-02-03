@@ -76,6 +76,21 @@ rule bcftools_norm_candidate_calls:
         ") 2>{log}"
 
 
+rule bcftools_index_candidate_calls:
+    input:
+        "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.norm.bcf",
+    output:
+        "results/candidate_calls/{individual}/{chromosome}/{region}.freebayes.norm.bcf.csi",
+    log:
+        "logs/candidate_calls/bcftools_index/{individual}/{chromosome}/{region}.freebayes.norm.log",
+    params:
+        extra="",  # optional parameters for bcftools index
+    resources:
+        runtime=lambda wildcards, attempt: 20 * attempt - 1,
+    wrapper:
+        "v1.22.0/bio/bcftools/index"
+
+
 rule aggregate_freebayes_region_calls:
     input:
         calls=aggregate_freebayes_region_calls_input(),
