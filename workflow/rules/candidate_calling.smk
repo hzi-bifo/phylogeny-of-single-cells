@@ -49,7 +49,7 @@ rule freebayes_per_region:
     threads: 1
     resources:
         runtime=lambda wildcards, attempt: 5 * attempt * 60 - 1,
-        mem_mb=lambda wc, attempt: 8000 + 16000 * attempt,
+        mem_mb=lambda wc, attempt: 8000 + 16000 * (attempt - 1),
     shell:
         "(freebayes {params.extra} -r {wildcards.chromosome}:{wildcards.region} -f {input.ref} {input.samples} | "
         " bcftools sort -O b -o {output} -T `mktemp -d` - ) 2> {log}"
