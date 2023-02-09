@@ -101,7 +101,7 @@ rule aggregate_freebayes_region_calls:
         "logs/candidate_calls/{individual}.freebayes.norm.log",
     params:
         extra="-a",
-    threads: 8
+    threads: 2
     resources:
         runtime=lambda wildcards, attempt: 10 * 60 * attempt - 1,
         mem_mb=lambda wildcards, input, attempt: input.size_mb * 4 * attempt
