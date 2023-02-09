@@ -104,6 +104,6 @@ rule aggregate_freebayes_region_calls:
     threads: 2
     resources:
         runtime=lambda wildcards, attempt: 10 * 60 * attempt - 1,
-        mem_mb=lambda wildcards, input, attempt: input.size_mb * 4 * attempt
+        mem_mb=lambda wildcards, input, attempt: input.size_mb * 6 * (1 + 0.5 * attempt)
     wrapper:
         "v1.21.1/bio/bcftools/concat"
