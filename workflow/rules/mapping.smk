@@ -129,7 +129,7 @@ rule merge_bulks:
         extra="",  # optional additional parameters as string
     threads: 8
     resources:
-        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        runtime=lambda wildcards, attempt: 50 * attempt - 1,
     wrapper:
         "v1.21.1/bio/samtools/merge"
 
