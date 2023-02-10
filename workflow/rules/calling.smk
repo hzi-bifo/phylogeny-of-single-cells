@@ -10,7 +10,8 @@ rule scatter_candidate_calls:
     conda:
         "../envs/rbt.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 30 - 1,
+        runtime=lambda wildcards, attempt: attempt * 40 - 1,
+        mem_mb=lambda wildcards, input, attempt: input.size_mb * 1.4 * attempt,
     shell:
         "rbt vcf-split {input} {output}"
 
@@ -87,6 +88,9 @@ rule aggregate_prosolo_chunk_calls:
         "logs/gather_scattered_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.log",
     params:
         extra="-a",
+    resources:
+        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        mem_mb=lambda wildcards, input, attempt: input.size_mb * (1 + 0.5 * attempt)
     wrapper:
         "v1.21.1/bio/bcftools/concat"
 
