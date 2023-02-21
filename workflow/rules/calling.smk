@@ -32,6 +32,7 @@ rule prosolo_calling:
     threads: 1
     resources:
         runtime=lambda wildcards, attempt: 6 * attempt * 60 - 1,
+        mem_mb=lambda wildcards, attempt: attempt * 4000,
     log:
         "logs/prosolo/{individual}/{sc}.{scatteritem}.merged_bulk.prosolo.log",
     wrapper:
@@ -42,9 +43,7 @@ rule sort_calls:
     input:
         "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.bcf",
     output:
-        temp(
-            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
-        ),
+        "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf"
     log:
         "logs/bcf-sort/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.log",
     conda:
@@ -61,9 +60,7 @@ rule bcftools_index_region_calls:
     input:
         "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf",
     output:
-        temp(
-            "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
-        ),
+        "results/calls/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.bcf.csi"
     log:
         "logs/bcftools_index/{individual}/{sc}/{scatteritem}.merged_bulk.prosolo.sorted.log",
     conda:
@@ -119,5 +116,8 @@ rule prosolo_control_fdr:
         fdr=0.25,
     log:
         "logs/final_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.log",
+    resources:
+        runtime=lambda wildcards, attempt: 60 * attempt - 1,
+        mem_mb=lambda wildcards, input, attempt: input.size_mb * (1 + 0.5 * attempt)
     wrapper:
         "v1.21.1/bio/prosolo/control-fdr"
