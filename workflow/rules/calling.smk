@@ -117,7 +117,7 @@ rule prosolo_control_fdr:
     log:
         "logs/final_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.log",
     resources:
-        runtime=lambda wildcards, attempt: 60 * attempt - 1,
-        mem_mb=lambda wildcards, input, attempt: input.size_mb * (1 + 0.5 * attempt)
+        runtime=lambda wildcards, attempt: 90 * attempt - 1,
+        mem_mb=lambda wildcards, attempt: 3000 * attempt
     wrapper:
         "v1.21.1/bio/prosolo/control-fdr"
