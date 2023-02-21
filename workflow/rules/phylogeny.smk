@@ -8,12 +8,12 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
     conda:
         "../envs/vembrane_vlr_bcftools.yaml"
     shell:
-        "( varlociraptor decode-phred < {input} |"
-        "  vembrane table "
+        "( vembrane table "
         "    --header 'CHROM, POS, REF, ALT, HOM_REF, HET, HOM_ALT' "
         '    \'CHROM, POS, REF, ALT, INFO["PROB_HOM_REF"] + INFO["PROB_ERR_ALT"], '
         '     INFO["PROB_ADO_TO_ALT"] + INFO["PROB_HET"] + INFO["PROB_ADO_TO_REF"], '
         '     INFO["PROB_HOM_ALT"] + INFO["PROB_ERR_REF"]\' '
+        "  <(varlociraptor decode-phred < {input} )"
         "  >{output}"
         ") 2> {log}"
 
