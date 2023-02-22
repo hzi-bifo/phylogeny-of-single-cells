@@ -61,9 +61,9 @@ to_raxml_ng_genotype_likelihoods <- function(ref, alt, lookup_table, order, hom_
 }
 
 read_genotype <- function(genotype) {
-  return read_tsv(snakemake@input[[genotype]]) %>%
+  read_tsv(snakemake@input[[genotype]]) %>%
     mutate(
-      ml_genotype = to_raxml_ng_genotype(genotype, REF, ALT, raxml_ng_genotype_lookup_table)
+      ml_genotype = to_raxml_ng_genotype(genotype, REF, ALT, raxml_ng_genotype_lookup_table),
       likelihoods = to_raxml_ng_genotype_likelihoods(REF, ALT, raxml_ng_genotype_lookup_table, HOM_REF, HET, HOM_ALT)
     ) %>%
     select(
