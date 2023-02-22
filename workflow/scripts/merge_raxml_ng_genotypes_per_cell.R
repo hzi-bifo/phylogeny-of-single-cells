@@ -5,7 +5,7 @@ sink(log, type="message")
 library(tidyverse)
 
 raxml_ng_genotype_lookup_table <- tribble(
-   ~a,  ~b, ~iupac,
+   ~r,  ~a, ~iupac,
   "A", "A",    "A",
   "C", "C",    "C",
   "G", "G",    "G",
@@ -24,9 +24,9 @@ raxml_ng_genotype_lookup_table <- tribble(
   "T", "G",    "K"
 )
 
-iupac_of <- function(a, b, table) {
-  return table %>%
-    filter( a == a, b == b) %>%
+iupac_of <- function(ref, alt, table) {
+  table %>%
+    filter( r == ref, a == alt) %>%
     pull(iupac)
 }
 
