@@ -6,7 +6,7 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
     log:
         "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log",
     conda:
-        "../envs/vembrane_vlr_bcftools.yaml"
+        "../envs/vembrane_vlr.yaml"
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
     shell:
@@ -141,7 +141,7 @@ rule prosolo_probs_to_scelestial_genotypes_per_cell:
     log:
         "logs/scelestial/{individual}/per_genotype/{sc}.{genotype}.genotypes.log",
     conda:
-        "../envs/vembrane_vlr_bcftools.yaml"
+        "../envs/vembrane_vlr.yaml"
     shell:
         "vembrane table "
         "  --header 'position, REF, ALT "
