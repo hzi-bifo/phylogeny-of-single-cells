@@ -21,22 +21,37 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
         ") 2> {log}"
 
 
+rule raxml_ng_ml_gt_and_likelihoods_per_cell_per_genotype:
+    input:
+        gt_likelihoods="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv",
+        genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.yaml"),
+        genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.yaml"),
+    output:
+        ml="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.tsv",
+    log:
+        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.log",
+    conda:
+        "../envs/rust.yaml"
+    script:
+        "../scripts/raxml_ng_ml_gt_and_likelihoods_per_cell.rs"
+
 rule merge_raxml_ng_genotypes_per_cell:
     input:
-        hom_ref="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_ref.genotype_likelihoods.tsv",
-        het="results/raxml_ng_input/{individual}/per_genotype/{sc}.het.genotype_likelihoods.tsv",
-        hom_alt="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_alt.genotype_likelihoods.tsv",
+        hom_ref="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_ref.ml_gt_and_likelihoods.tsv",
+        het="results/raxml_ng_input/{individual}/per_genotype/{sc}.het.ml_gt_and_likelihoods.tsv",
+        hom_alt="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_alt.ml_gt_and_likelihoods.tsv",
     output:
         "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv",
     log:
         "logs/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.log",
     conda:
-        "../envs/tidyverse.yaml"
+        "../envs/xsv.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 90 - 1,
-        mem_mb=lambda wildcards, input, attempt: input.size_mb * 6 * attempt,
-    script:
-        "../scripts/merge_raxml_ng_genotypes_per_cell.R"
+        mem_mb=lambda wildcards, input: input.size_mb * 2,
+    shell:
+        '( xsv cat rows -d "\t" {input.hom_ref} {input.het} {input.hom_alt} |'
+        "  xsv sort --select variant_key --output {output} "
+        ") 2>{log}"
 
 
 rule merge_raxml_ng_genotypes_per_individual:
@@ -47,9 +62,20 @@ rule merge_raxml_ng_genotypes_per_individual:
     log:
         "logs/raxml_ng_input/{individual}.genotype_likelihoods.log",
     conda:
-        "../envs/tidyverse.yaml"
-    script:
-        "../scripts/merge_raxml_ng_genotypes_per_individual.R"
+        "../envs/csvkit.yaml"
+    resources:
+        runtime=lambda wildcards, attempt: attempt * 90 - 1,
+        mem_mb=lambda wildcards, input: input.size_mb * 1.1,
+    shell:
+        "( csvjoin --outer "
+        "    --tabs "
+        "    --out-tabs "
+        "    --quoting 3 " # 3 = no quoting
+        "    --no-inference " # major bottleneck according to: https://csvkit.readthedocs.io/en/1.1.1/tricks.html#slow-performance
+        "    --columns variant_key "
+        "    {input} "
+        "    >{output} "
+        ") 2>{log}"
 
 
 rule raxml_ng_parse:
@@ -91,7 +117,7 @@ rule raxml_ng:
     resources:
         mem_mb=get_raxml_ng_mem_mb,
     shell:
-        "raxml-ng --all --msa {input.rsa} --model {params.model} --prefix {params.prefix} --threads {threads} --tree pars{{50}},rand{{50}} 2>{log}"
+        "raxml-ng --all --prob-msa --msa {input.rsa} --model {params.model} --prefix {params.prefix} --threads {threads} --tree pars{{50}},rand{{50}} 2>{log}"
 
 
 rule raxml_ng_support:
