@@ -43,7 +43,7 @@ rule raxml_ng_ml_gt_and_likelihoods_per_cell_per_genotype:
         "      then put '{params.likelihoods_init}; "
         "                $[$REF] = $HOM_REF;$[$het_IUPAC] = $HET; $[$ALT] = $HOM_ALT; "
         "                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], \",\"); "
-        "                $variant_key = format(\"{}:{}_{}_{}\", $CHROM,$POS,$REF,$ALT)' "
+        "                $variant_key = format(\"{{}}:{{}}_{{}}_{{}}\", $CHROM,$POS,$REF,$ALT)' "
         "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
         "      then cut -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
         "      then reorder -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
