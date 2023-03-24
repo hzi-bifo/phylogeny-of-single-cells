@@ -113,7 +113,7 @@ rule prosolo_control_fdr:
         if wc.genotype == "hom_ref"
         else "ONLY-USE-het-hom_alt-or-hom_ref-for-genotype",
         # false discovery rate to control for
-        fdr=0.25,
+        fdr=0.05,
     log:
         "logs/final_calls/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.log",
     resources:
