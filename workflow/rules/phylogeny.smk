@@ -36,6 +36,7 @@ rule raxml_ng_ml_gt_and_likelihoods_per_cell_per_genotype:
         likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
         likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
         ml_genotype_cols=lambda wc: "REF,REF" if wc.genotype == "hom_ref" else "REF,ALT" if wc.genotype == "het" else "ALT,ALT" if wc.genotype == "hom_alt" else "please_only_use_genotypes:hom_ref,het,hom_alt",
+    threads: 6
     shell:
         "(mlr --tsv join -j REF,ALT --lp het_ -f {input.genotype_mapping} "
         "      then join -j REF,ALT -r {params.ml_genotype_cols} --lp ml_ -f {input.genotype_mapping}  "
