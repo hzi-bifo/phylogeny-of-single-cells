@@ -24,16 +24,32 @@ rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
 rule raxml_ng_ml_gt_and_likelihoods_per_cell_per_genotype:
     input:
         gt_likelihoods="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv",
-        genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.yaml"),
-        genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.yaml"),
+        genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.tsv"),
+        genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
         ml="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.tsv",
     log:
         "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.log",
     conda:
-        "../envs/rust.yaml"
-    script:
-        "../scripts/raxml_ng_ml_gt_and_likelihoods_per_cell.rs"
+        "../envs/miller.yaml"
+    params:
+        likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
+        likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
+        ml_genotype_cols=lambda wc: "REF,REF" if wc.genotype == "hom_ref" else "REF,ALT" if wc.genotype == "het" else "ALT,ALT" if wc.genotype == "hom_alt" else "please_only_use_genotypes:hom_ref,het,hom_alt",
+    shell:
+        "(mlr --tsv join -j REF,ALT --lp het_ -f {input.genotype_mapping} "
+        "      then join -j REF,ALT -r {params.ml_genotype_cols} --lp ml_ -f {input.genotype_mapping}  "
+        "      then put '{params.likelihoods_init}; "
+        "                $[$REF] = $HOM_REF;$[$het_IUPAC] = $HET; $[$ALT] = $HOM_ALT; "
+        "                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], \",\"); "
+        "                $variant_key = format(\"{}:{}_{}_{}\", $CHROM,$POS,$REF,$ALT)' "
+        "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
+        "      then cut -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
+        "      then reorder -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
+        "      {input.gt_likelihoods} "
+        "   >{output} "
+        ") 2> {log} "
+
 
 rule merge_raxml_ng_genotypes_per_cell:
     input:
