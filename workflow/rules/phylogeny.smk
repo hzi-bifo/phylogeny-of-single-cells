@@ -57,7 +57,7 @@ rule merge_raxml_ng_genotypes_per_individual:
     conda:
         "../envs/miller_sed.yaml"
     params:
-        joins=lambda wildcards, input: " then join --ur --ul -j variant_key -f ".join(input),
+        joins=lambda wildcards, input: " then join --ur --ul -j variant_key -f ".join(input[:-1]),
         default_likelihoods=",".join(["0.1"] * 10),
     resources:
         runtime=lambda wildcards, attempt: attempt * 90 - 1,
@@ -75,7 +75,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         '        $without_1 = gsub($without_n, $without_n[1], ""); '
         '        $without_1 != "";\' '
         "    then cut -r -f '^gt$,^likelihoods_.*$' "
-        "    then reorder -f gt head.tsv | "
+        "    then reorder -f gt {inut[-1]} | "
         "  sed -e '1s/gt\\t//' -e '1s/likelihoods_//g'"
         "  >{output}; "
         "  CELLS=$(head -n 1 {output} | wc -w); "
