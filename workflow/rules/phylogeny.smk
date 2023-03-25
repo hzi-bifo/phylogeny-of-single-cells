@@ -51,29 +51,42 @@ rule merge_raxml_ng_genotypes_per_individual:
     input:
         get_all_raxml_gts_for_individual,
     output:
-        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.tsv",
+        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
     log:
         "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.log",
     conda:
-        "../envs/csvkit.yaml"
+        "../envs/miller_sed.yaml"
+    params:
+        joins=lambda wildcards, input: " then join --ur --ul -j variant_key -f ".join(input),
+        default_likelihoods=",".join(["0.1"] * 10),
     resources:
         runtime=lambda wildcards, attempt: attempt * 90 - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 1.1,
+        mem_mb=lambda wildcards, input: input.size_mb * 0.7,
     shell:
-        "( csvjoin --outer "
-        "    --tabs "
-        "    --out-tabs "
-        "    --quoting 3 " # 3 = no quoting
-        "    --no-inference " # major bottleneck according to: https://csvkit.readthedocs.io/en/1.1.1/tricks.html#slow-performance
-        "    --columns variant_key "
-        "    {input} "
-        "    >{output} "
+        "( mlr --tsv "
+        "      join --ur --ul -j variant_key -f {params.joins} "
+        "    then unsparsify --fill-with 'N' "
+        "    then put "
+        '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
+        '      for (field, value in select($*, func(k,v) {{return k =~ "likelihoods_.*"}}) ) '
+        '        {{ $[field] = ssub(value, "N", "{params.default_likelihoods}" ) }}; '
+        '        $without_n = gssub($gt, "N", "");\' '
+        '    then filter \'$without_n != ""; '
+        '        $without_1 = gsub($without_n, $without_n[1], ""); '
+        '        $without_1 != "";\' '
+        "    then cut -r -f '^gt$,^likelihoods_.*$' "
+        "    then reorder -f gt head.tsv | "
+        "  sed -e '1s/gt\\t//' -e '1s/likelihoods_//g'"
+        "  >{output}; "
+        "  CELLS=$(head -n 1 {output} | wc -w); "
+        "  SITES=$(tail -n +2 {output} | wc -l); "
+        '  sed -i -e "1i\\$CELLS\\t$SITES" {output} '
         ") 2>{log}"
 
 
 rule raxml_ng_parse:
     input:
-        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.tsv",
+        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
     output:
         rba="results/raxml_ng_parse/{individual}.raxml.rba",
         log="logs/raxml_ng_parse/{individual}.raxml.log",
