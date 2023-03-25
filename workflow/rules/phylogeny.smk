@@ -1,83 +1,59 @@
-rule prosolo_probs_to_raxml_ng_genotypes_per_cell:
+rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
     input:
-        "results/genotype_fdr/{individual}/{sc}.merged_bulk.prosolo.sorted.{genotype}.fdr_controlled.bcf",
+        calls="results/calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
+        genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.tsv"),
+        genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
-        "results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv",
+        ml="results/raxml_ng_input/{individual}/{sc}.ml_gt_and_likelihoods.tsv",
     log:
-        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.log",
+        "logs/raxml_ng_input/{individual}/{sc}.ml_gt_and_likelihoods.log",
     conda:
-        "../envs/vembrane_vlr.yaml"
+        "../envs/vembrane_vlr_bcftools_mlr.yaml"
+    params:
+        likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
+        likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
+    threads: 6
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
     shell:
+        # TODO: do bcftools view filtering for {sc} and coverage in in {sc} before prosolo calling, but
+        # keep it here for now to avoid rerunning already done prosolo calling
         "( vembrane filter 'REF != \"N\" and ALT != \"N\"'"
-        "    <(varlociraptor decode-phred < {input} ) |"
+        "    <( bcftools view --samples {wildcards.sc} {input.calls} | "
+        "       bcftools view --include 'FORMAT/DP[0]>=1' | "
+        "       varlociraptor decode-phred "
+        "     ) |"
         "  vembrane table "
         "    --header 'CHROM, POS, REF, ALT, HOM_REF, HET, HOM_ALT' "
         '    \'CHROM, POS, REF, ALT, INFO["PROB_HOM_REF"] + INFO["PROB_ERR_ALT"], '
         '     INFO["PROB_ADO_TO_ALT"] + INFO["PROB_HET"] + INFO["PROB_ADO_TO_REF"], '
-        '     INFO["PROB_HOM_ALT"] + INFO["PROB_ERR_REF"]\' '
-        "  >{output}"
-        ") 2> {log}"
-
-
-rule raxml_ng_ml_gt_and_likelihoods_per_cell_per_genotype:
-    input:
-        gt_likelihoods="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.genotype_likelihoods.tsv",
-        genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.tsv"),
-        genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
-    output:
-        ml="results/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.tsv",
-    log:
-        "logs/raxml_ng_input/{individual}/per_genotype/{sc}.{genotype}.ml_gt_and_likelihoods.log",
-    conda:
-        "../envs/miller.yaml"
-    params:
-        likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
-        likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
-        ml_genotype_cols=lambda wc: "REF,REF" if wc.genotype == "hom_ref" else "REF,ALT" if wc.genotype == "het" else "ALT,ALT" if wc.genotype == "hom_alt" else "please_only_use_genotypes:hom_ref,het,hom_alt",
-    threads: 6
-    shell:
-        "(mlr --tsv join -j REF,ALT --lp het_ -f {input.genotype_mapping} "
-        "      then join -j REF,ALT -r {params.ml_genotype_cols} --lp ml_ -f {input.genotype_mapping}  "
-        "      then put '{params.likelihoods_init}; "
-        "                $[$REF] = $HOM_REF;$[$het_IUPAC] = $HET; $[$ALT] = $HOM_ALT; "
+        '     INFO["PROB_HOM_ALT"] + INFO["PROB_ERR_REF"]\' | '
+        "  mlr --tsv join -j REF,ALT --lp het_ -f {input.genotype_mapping} "
+        "      then put '{params.likelihoods_init} "
+        "                $[$REF] = $HOM_REF; "
+        "                $[$het_IUPAC] = $HET; "
+        "                $[$ALT] = $HOM_ALT; "
         "                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], \",\"); "
-        "                $variant_key = format(\"{{}}:{{}}_{{}}_{{}}\", $CHROM,$POS,$REF,$ALT)' "
+        "                $variant_key = format(\"{{}}:{{}}_{{}}_{{}}\", $CHROM,$POS,$REF,$ALT); "
+        "                $MAX = max($HOM_REF, $HET, $HOM_ALT); "
+        "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; }} "
+        "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT }} "
+        "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT }};' "
+        "      then join -j REF,ALT -r ONE,TWO --lp ml_ -f {input.genotype_mapping} "
+        "      then cut -f variant_key,ml_IUPAC,likelihoods_{wildcards.sc} "
         "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
-        "      then cut -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
         "      then reorder -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
-        "      {input.gt_likelihoods} "
-        "   >{output} "
-        ") 2> {log} "
-
-
-rule merge_raxml_ng_genotypes_per_cell:
-    input:
-        hom_ref="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_ref.ml_gt_and_likelihoods.tsv",
-        het="results/raxml_ng_input/{individual}/per_genotype/{sc}.het.ml_gt_and_likelihoods.tsv",
-        hom_alt="results/raxml_ng_input/{individual}/per_genotype/{sc}.hom_alt.ml_gt_and_likelihoods.tsv",
-    output:
-        "results/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.tsv",
-    log:
-        "logs/raxml_ng_input/{individual}/{sc}.genotype_likelihoods.log",
-    conda:
-        "../envs/xsv.yaml"
-    resources:
-        mem_mb=lambda wildcards, input: input.size_mb * 2,
-    shell:
-        '( xsv cat rows -d "\t" {input.hom_ref} {input.het} {input.hom_alt} |'
-        "  xsv sort --select variant_key --output {output} "
-        ") 2>{log}"
+        "  >{output.ml}"
+        ") 2> {log}"
 
 
 rule merge_raxml_ng_genotypes_per_individual:
     input:
         get_all_raxml_gts_for_individual,
     output:
-        "results/raxml_ng_input/{individual}.genotype_likelihoods.tsv",
+        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.tsv",
     log:
-        "logs/raxml_ng_input/{individual}.genotype_likelihoods.log",
+        "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.log",
     conda:
         "../envs/csvkit.yaml"
     resources:
@@ -97,7 +73,7 @@ rule merge_raxml_ng_genotypes_per_individual:
 
 rule raxml_ng_parse:
     input:
-        msa="results/raxml_ng_input/{individual}.genotype_likelihoods.tsv",
+        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.tsv",
     output:
         rba="results/raxml_ng_parse/{individual}.raxml.rba",
         log="logs/raxml_ng_parse/{individual}.raxml.log",

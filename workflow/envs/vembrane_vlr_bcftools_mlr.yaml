@@ -3,5 +3,7 @@ channels:
   - bioconda
   - nodefaults
 dependencies:
+  - bcftools =1.16
+  - miller =6.7
   - vembrane =0.13
   - varlociraptor =5.6
