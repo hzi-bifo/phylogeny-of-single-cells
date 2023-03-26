@@ -60,7 +60,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         joins=lambda wildcards, input: " then join --ur --ul -j variant_key -f ".join(list(input)[:-1]),
         default_likelihoods=",".join(["0.1"] * 10),
     resources:
-        runtime=lambda wildcards, attempt: attempt * 90 - 1,
+        runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
         mem_mb=lambda wildcards, input: input.size_mb * 0.7,
     shell:
         "( mlr --tsv "
