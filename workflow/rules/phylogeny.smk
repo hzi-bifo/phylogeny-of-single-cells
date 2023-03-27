@@ -47,6 +47,8 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         ") 2> {log}"
 
 
+# TODO: try xsj join chaining, maybe this requires less memory?
+# TODO: parallelize this join per chromosome, to limit memory usage
 rule merge_raxml_ng_genotypes_per_individual:
     input:
         get_all_raxml_gts_for_individual,
