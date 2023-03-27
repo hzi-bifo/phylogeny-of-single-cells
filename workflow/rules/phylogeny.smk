@@ -83,7 +83,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         '        $without_1 = gsub($without_n, $without_n[1], ""); '
         '        $without_1 != "";\' '
         "    then cut -r -f '^gt$,^likelihoods_.*$' "
-        "    then reorder -f gt {params.last_input} | "
+        "    then reorder -f gt | "
         "  sed -e '1s/gt\\t//' -e '1s/likelihoods_//g'"
         "  >{output}; "
         "  CELLS=$(head -n 1 {output} | wc -w); "
