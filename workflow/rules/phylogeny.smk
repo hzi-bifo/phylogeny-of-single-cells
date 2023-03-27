@@ -62,7 +62,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         last_input=lambda wildcards, input: input[-1],
     resources:
         runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 4.0,
+        mem_mb=lambda wildcards, input: input.size_mb * 13,
     threads: 8
     shell:
         "( mlr --tsv "
