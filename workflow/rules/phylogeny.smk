@@ -60,7 +60,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         first_input=lambda wildcards, input: input[0],
         joins=lambda wildcards, input:
             " | xsv fmt --out-delimiter '\\t' | "
-            "mlr --tsv put 'if ( is_empty($variant_key) ) {{ $variant_key = $variant_key_2 }};' "
+            "mlr --tsv put 'if ( is_empty($variant_key) ) { $variant_key = $variant_key_2 };' "
             "  then cut -x -f variant_key_2 | "
             "xsv join --delimiter '\\t' --full variant_key /dev/stdin variant_key ".join(input[1:]),
         default_likelihoods=",".join(["0.1"] * 10),
