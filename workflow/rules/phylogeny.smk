@@ -69,7 +69,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         mem_mb=lambda wildcards, input: input.size_mb * 13,
     threads: 8
     shell:
-        "( xsv join --delimiter '\t' --full variant_key {params.first_input} variant_key {params.joins} | " 
+        "( xsv join --delimiter '\\t' --full variant_key {params.first_input} variant_key {params.joins} | " 
         "    xsv fmt --out-delimiter '\\t' | "
         "    mlr --tsv put 'if ( is_empty($variant_key) ) {{ $variant_key = $variant_key_2 }};' "
         "    then cut -x -f variant_key_2 | "
