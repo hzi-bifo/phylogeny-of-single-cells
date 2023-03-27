@@ -72,7 +72,7 @@ rule merge_raxml_ng_genotypes_per_individual:
         "( xsv join --delimiter '\\t' --full variant_key {params.first_input} variant_key {params.joins} | " 
         "    xsv fmt --out-delimiter '\\t' | "
         "    mlr --tsv put 'if ( is_empty($variant_key) ) {{ $variant_key = $variant_key_2 }};' "
-        "    then cut -x -f variant_key_2 | "
+        "    then cut -x -f variant_key_2 "
         "    then unsparsify --fill-with 'N' "
         "    then put "
         '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
