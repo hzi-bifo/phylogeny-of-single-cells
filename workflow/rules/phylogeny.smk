@@ -1,18 +1,32 @@
+NTS = ["A", "C", "G", "T"]
+
 rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
+    """
+    This rule can fail with missing output if only very few genomic sites are
+    queried, namely if any of the non-homozygous genotypes does not occur in
+    the set of called variants. As this is rather unlikelikely to occur, I
+    would rather have the rule fail on such cases then to have it produce
+    aritificially created empty genotype files.
+    """
     input:
         calls="results/calls/{individual}/{sc}.merged_bulk.prosolo.sorted.bcf",
         genotype_mapping=workflow.source_path("../resources/raxml_ng_genotype_mapping.tsv"),
         genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
-        ml="results/raxml_ng_input/{individual}/{sc}.ml_gt_and_likelihoods.tsv",
+        ml=expand(
+            "results/raxml_ng_input/{{individual}}/{{sc}}/ml_gt_and_likelihoods/{ref_alt}.tsv",
+            ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
+        ),
     log:
-        "logs/raxml_ng_input/{individual}/{sc}.ml_gt_and_likelihoods.log",
+        "logs/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods.ref_alt_tsvs.log",
     conda:
         "../envs/vembrane_vlr_bcftools_mlr.yaml"
     params:
         likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
         likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
+        prefix=lambda wc, output: path.dirname(output.ml[0]),
     threads: 6
+    group: "indexed_cell_likelihoods"
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
     shell:
@@ -34,45 +48,45 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         "                $[$het_IUPAC] = $HET; "
         "                $[$ALT] = $HOM_ALT; "
         "                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], \",\"); "
-        "                $variant_key = format(\"{{}}:{{}}_{{}}_{{}}\", $CHROM,$POS,$REF,$ALT); "
         "                $MAX = max($HOM_REF, $HET, $HOM_ALT); "
         "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; }} "
         "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT }} "
         "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT }};' "
         "      then join -j REF,ALT -r ONE,TWO --lp ml_ -f {input.genotype_mapping} "
-        "      then cut -f variant_key,ml_IUPAC,likelihoods_{wildcards.sc} "
+        "      then cut -f CHROM,POS,REF,ALT,ml_IUPAC,likelihoods_{wildcards.sc} "
         "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
-        "      then reorder -f variant_key,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
-        "  >{output.ml}"
+        "      then reorder -f CHROM,POS,REF,ALT,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
+        "      then split --prefix {params.prefix} -g REF,ALT"
         ") 2> {log}"
 
-
-rule merge_raxml_ng_genotypes_per_individual:
+# xsv join is more memory efficient, but do it one join at a time
+rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
     input:
-        get_all_raxml_gts_for_individual,
+        get_all_raxml_likelihoods_for_individual_and_genotype,
     output:
-        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
     log:
-        "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.log",
+        "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg.log",
     conda:
-        "../envs/xsv_miller_sed.yaml"
+        "../envs/xsv_miller.yaml"
     params:
         first_input=lambda wildcards, input: input[0],
         joins=lambda wildcards, input:
             " | xsv fmt --out-delimiter '\\t' | "
-            "mlr --tsv put 'if ( is_empty($variant_key) ) { $variant_key = $variant_key_2 };' "
-            "  then cut -x -f variant_key_2 | "
-            "xsv join --delimiter '\\t' --full variant_key /dev/stdin variant_key ".join(input[1:]),
+            "mlr --tsv put 'if ( is_empty($CHROM) ) { $CHROM = $CHROM_2; $POS = $POS_2 };' "
+            "  then cut -x -f CHROM_2,POS_2,REF_2,ALT_2 | "
+            "xsv join --delimiter '\\t' --full CHROM,POS /dev/stdin CHROM,POS ".join(input[1:]),
         default_likelihoods=",".join(["0.1"] * 10),
     resources:
         runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 13,
+        mem_mb=lambda wildcards, input: input.size_mb * 4,
     threads: 8
     shell:
-        "( xsv join --delimiter '\\t' --full variant_key {params.first_input} variant_key {params.joins} | " 
+        "( xsv join --delimiter '\\t' --full CHROM,POS {params.first_input} CHROM,POS {params.joins} | " 
         "    xsv fmt --out-delimiter '\\t' | "
         "    mlr --tsv put 'if ( is_empty($variant_key) ) {{ $variant_key = $variant_key_2 }};' "
-        "    then cut -x -f variant_key_2 "
+        "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
+        "    then cut -x -f CHROM,POS,REF,ALT,CHROM_2,POS_2,REF_2,ALT_2 "
         "    then unsparsify --fill-with 'N' "
         "    then put "
         '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
@@ -83,55 +97,33 @@ rule merge_raxml_ng_genotypes_per_individual:
         '        $without_1 = gsub($without_n, $without_n[1], ""); '
         '        $without_1 != "";\' '
         "    then cut -r -f '^gt$,^likelihoods_.*$' "
-        "    then reorder -f gt | "
-        "  sed -e '1s/gt\\t//' -e '1s/likelihoods_//g'"
+        "    then reorder -f gt "
+        "  >{output}; "
+        ") 2>{log}"
+
+
+rule concat_raxml_ng_input_sites:
+    input:
+        expand(
+            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods.{ref_alt}.catg",
+            ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
+        ),
+    output:
+        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+    log:
+        "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg.log",
+    conda:
+        "../envs/xsv_sed.yaml"
+    threads: 2
+    shell:
+        "( xsv cat rows --delimiter '\\t' {input} | "
+        "    xsv fmt --out-delimiter '\\t' | "
+        "    sed -e '1s/gt\\t//' -e '1s/likelihoods_//g' "
         "  >{output}; "
         "  CELLS=$(head -n 1 {output} | wc -w); "
         "  SITES=$(tail -n +2 {output} | wc -l); "
         '  sed -i -e "1i\\$CELLS\\t$SITES" {output} '
         ") 2>{log}"
-
-
-
-## TODO: try xsj join chaining, maybe this requires less memory?
-## TODO: parallelize this join per chromosome, to limit memory usage
-#rule merge_raxml_ng_genotypes_per_individual:
-#    input:
-#        get_all_raxml_gts_for_individual,
-#    output:
-#        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-#    log:
-#        "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.log",
-#    conda:
-#        "../envs/miller_sed.yaml"
-#    params:
-#        joins=lambda wildcards, input: " then join --ur --ul -j variant_key -f ".join(input[:-1]),
-#        default_likelihoods=",".join(["0.1"] * 10),
-#        last_input=lambda wildcards, input: input[-1],
-#    resources:
-#        runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
-#        mem_mb=lambda wildcards, input: input.size_mb * 13,
-#    threads: 8
-#    shell:
-#        "( mlr --tsv "
-#        "      join --ur --ul -j variant_key -f {params.joins} "
-#        "    then unsparsify --fill-with 'N' "
-#        "    then put "
-#        '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
-#        '      for (field, value in select($*, func(k,v) {{return k =~ "likelihoods_.*"}}) ) '
-#        '        {{ $[field] = ssub(value, "N", "{params.default_likelihoods}" ) }}; '
-#        '        $without_n = gssub($gt, "N", "");\' '
-#        '    then filter \'$without_n != ""; '
-#        '        $without_1 = gsub($without_n, $without_n[1], ""); '
-#        '        $without_1 != "";\' '
-#        "    then cut -r -f '^gt$,^likelihoods_.*$' "
-#        "    then reorder -f gt {params.last_input} | "
-#        "  sed -e '1s/gt\\t//' -e '1s/likelihoods_//g'"
-#        "  >{output}; "
-#        "  CELLS=$(head -n 1 {output} | wc -w); "
-#        "  SITES=$(tail -n +2 {output} | wc -l); "
-#        '  sed -i -e "1i\\$CELLS\\t$SITES" {output} '
-#        ") 2>{log}"
 
 
 rule raxml_ng_parse:

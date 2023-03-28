@@ -181,16 +181,17 @@ def aggregate_freebayes_region_calls_input(ext=".bcf"):
     return inner
 
 
-def get_all_raxml_gts_for_individual(wildcards):
+def get_all_raxml_likelihoods_for_individual_and_genotype(wildcards):
     single_cells = samples.loc[
         (samples["individual"] == wildcards.individual)
         & (samples["sample_type"] == "single_cell"),
         "sample_name",
     ]
     return expand(
-        "results/raxml_ng_input/{individual}/{sc}.ml_gt_and_likelihoods.tsv",
+        "results/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods/{ref_alt}.tsv",
         individual=wildcards.individual,
         sc=single_cells,
+        ref_alt=wildcards.ref_alt,
     )
 
 
