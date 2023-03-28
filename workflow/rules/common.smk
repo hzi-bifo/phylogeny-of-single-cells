@@ -188,7 +188,7 @@ def get_all_raxml_likelihoods_for_individual_and_genotype(wildcards):
         "sample_name",
     ]
     return expand(
-        "results/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods/{ref_alt}.tsv",
+        "results/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods/_{ref_alt}.tsv",
         individual=wildcards.individual,
         sc=single_cells,
         ref_alt=wildcards.ref_alt,
