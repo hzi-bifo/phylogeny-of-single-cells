@@ -14,7 +14,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
         ml=expand(
-            "results/raxml_ng_input/{{individual}}/{{sc}}/ml_gt_and_likelihoods/{ref_alt}.tsv",
+            "results/raxml_ng_input/{{individual}}/{{sc}}/ml_gt_and_likelihoods/_{ref_alt}.tsv",
             ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
         ),
     log:
@@ -57,6 +57,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         "      then reorder -f CHROM,POS,REF,ALT,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
         "      then split --prefix {params.prefix} -g REF,ALT"
         ") 2> {log}"
+
 
 # xsv join is more memory efficient, but do it one join at a time
 rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
