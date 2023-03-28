@@ -24,7 +24,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
     params:
         likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
         likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
-        prefix=lambda wc, output: path.dirname(output.ml[0]),
+        prefix=lambda wc, output: path.dirname(output.ml[0]) + "/",
     threads: 6
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
