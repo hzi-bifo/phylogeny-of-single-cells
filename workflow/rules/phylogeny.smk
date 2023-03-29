@@ -68,6 +68,7 @@ rule join_one_more_cell:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv",
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv.log",
+    group: "ref_alt_per_individual"
     conda:
         "../envs/xsv_miller.yaml"
     resources:
@@ -92,13 +93,14 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg.log",
+    group: "ref_alt_per_individual"
     conda:
         "../envs/miller.yaml"
     params:
         default_likelihoods=",".join(["0.1"] * 10),
-    threads: 4
+    threads: 2
     shell:
-        "( mlr --from {input.all_cells} --tsv cut -x CHROM,POS "
+        "( mlr --from {input.all_cells} --tsv cut -x CHROM,POS,REF,ALT "
         "    then unsparsify --fill-with 'N' "
         "    then put "
         '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
