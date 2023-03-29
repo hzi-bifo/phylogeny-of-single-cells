@@ -71,9 +71,8 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        runtime=lambda wildcards, attempt, input: attempt * 30 - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 4,
-    threads: 4
+        mem_mb=lambda wildcards, attempt, input: attempt * input.size_mb * 2,
+    threads: 2
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {input.sc} CHROM,POS {input.previous_cells} | " 
         "    xsv fmt --out-delimiter '\\t' | "
