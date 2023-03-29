@@ -61,6 +61,7 @@ wildcard_constraints:
     sample="|".join(samples["sample_name"]),
     sc="|".join(samples["sample_name"]),
     genotype="|".join(["hom_ref", "het", "hom_alt"]),
+    ref_alt="[ACGT]_[ACGT]",
 
 
 #### compile wanted workflow outputs
@@ -179,20 +180,6 @@ def aggregate_freebayes_region_calls_input(ext=".bcf"):
             )
 
     return inner
-
-
-def get_all_raxml_likelihoods_for_individual_and_genotype(wildcards):
-    single_cells = samples.loc[
-        (samples["individual"] == wildcards.individual)
-        & (samples["sample_type"] == "single_cell"),
-        "sample_name",
-    ]
-    return expand(
-        "results/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods/_{ref_alt}.tsv",
-        individual=wildcards.individual,
-        sc=single_cells,
-        ref_alt=wildcards.ref_alt,
-    )
 
 
 def get_all_scelestial_gts_for_individual(wildcards):

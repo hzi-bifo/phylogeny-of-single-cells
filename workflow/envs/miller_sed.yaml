@@ -1,6 +1,0 @@
-channels:
-  - conda-forge
-  - nodefaults
-dependencies:
-  - miller =6.7
-  - sed =4.8

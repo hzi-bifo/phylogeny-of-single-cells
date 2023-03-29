@@ -14,17 +14,17 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
         ml=expand(
-            "results/raxml_ng_input/{{individual}}/{{sc}}/ml_gt_and_likelihoods/_{ref_alt}.tsv",
+            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{{sc}}_{ref_alt}.tsv",
             ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
         ),
     log:
-        "logs/raxml_ng_input/{individual}/{sc}/ml_gt_and_likelihoods.ref_alt_tsvs.log",
+        "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{sc}.ref_alt_tsvs.log",
     conda:
         "../envs/vembrane_vlr_bcftools_mlr.yaml"
     params:
         likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
         likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
-        prefix=lambda wc, output: path.dirname(output.ml[0]) + "/",
+        prefix=lambda wc, output: path.dirname(output.ml[0]) + f"/{wc.sc}",
     threads: 4
     resources:
         runtime=lambda wildcards, attempt: attempt * 30 - 1,
@@ -60,32 +60,46 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
 
 
 # xsv join is more memory efficient, but do it one join at a time
-rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
+rule join_one_more_cell:
     input:
-        get_all_raxml_likelihoods_for_individual_and_genotype,
+        sc="results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{sc}_{ref_alt}.tsv",
+        previous_cells="results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}_{ref_alt}.tsv",
+    output:
+        "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv",
+    log:
+        "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv.log",
+    conda:
+        "../envs/xsv_miller.yaml"
+    resources:
+        runtime=lambda wildcards, attempt, input: attempt * 30 - 1,
+        mem_mb=lambda wildcards, input: input.size_mb * 4,
+    threads: 4
+    shell:
+        "( xsv join --delimiter '\\t' --full CHROM,POS {input.sc} CHROM,POS {input.previous_cells} | " 
+        "    xsv fmt --out-delimiter '\\t' | "
+        "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
+        "    then cut -x -f CHROM_2,POS_2,REF_2,ALT_2 "
+        "  >{output} "
+        ") 2>{log}"
+
+ 
+rule parse_to_raxml_ng_gt_and_likelihoods:
+    input:
+        all_cells=lambda wc: expand(
+            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
+            cells=".".join( samples.loc[ (samples["individual"] == wc.individual) & (samples["sample_type"] == "single_cell"), "sample_name"] )
+        ),
     output:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg.log",
     conda:
-        "../envs/xsv_miller.yaml"
+        "../envs/miller.yaml"
     params:
-        first_input=lambda wildcards, input: input[0],
-        joins=lambda wildcards, input:
-            " | xsv fmt --out-delimiter '\\t' | "
-            "mlr --tsv put 'if ( is_empty($CHROM) ) { $CHROM = $CHROM_2; $POS = $POS_2 };' "
-            "  then cut -x -f CHROM_2,POS_2,REF_2,ALT_2 | "
-            "xsv join --delimiter '\\t' --full CHROM,POS /dev/stdin CHROM,POS ".join(input[1:]),
         default_likelihoods=",".join(["0.1"] * 10),
-    resources:
-        runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 30,
-    threads: 8
+    threads: 4
     shell:
-        "( xsv join --delimiter '\\t' --full CHROM,POS {params.first_input} CHROM,POS {params.joins} | " 
-        "    xsv fmt --out-delimiter '\\t' | "
-        "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
-        "    then cut -x -f CHROM,POS,REF,ALT,CHROM_2,POS_2,REF_2,ALT_2 "
+        "( mlr --from {input.all_cells} --tsv cut -x CHROM,POS "
         "    then unsparsify --fill-with 'N' "
         "    then put "
         '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
@@ -97,7 +111,7 @@ rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
         '        $without_1 != "";\' '
         "    then cut -r -f '^gt$,^likelihoods_.*$' "
         "    then reorder -f gt "
-        "  >{output}; "
+        "  >{output} "
         ") 2>{log}"
 
 
