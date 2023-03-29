@@ -79,7 +79,7 @@ rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
         default_likelihoods=",".join(["0.1"] * 10),
     resources:
         runtime=lambda wildcards, attempt, input: attempt * 30 * len(input) - 1,
-        mem_mb=lambda wildcards, input: input.size_mb * 10,
+        mem_mb=lambda wildcards, input: input.size_mb * 30,
     threads: 8
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {params.first_input} CHROM,POS {params.joins} | " 
