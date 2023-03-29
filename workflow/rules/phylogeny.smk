@@ -84,7 +84,6 @@ rule merge_raxml_ng_likelihoods_per_individual_per_genotype:
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {params.first_input} CHROM,POS {params.joins} | " 
         "    xsv fmt --out-delimiter '\\t' | "
-        "    mlr --tsv put 'if ( is_empty($variant_key) ) {{ $variant_key = $variant_key_2 }};' "
         "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
         "    then cut -x -f CHROM,POS,REF,ALT,CHROM_2,POS_2,REF_2,ALT_2 "
         "    then unsparsify --fill-with 'N' "
