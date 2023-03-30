@@ -79,6 +79,7 @@ rule join_one_more_cell:
         "    xsv fmt --out-delimiter '\\t' | "
         "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
         "    then cut -x -f CHROM_2,POS_2,REF_2,ALT_2 "
+        "    then fill-empty -v 'N' "
         "  >{output} "
         ") 2>{log}"
 
