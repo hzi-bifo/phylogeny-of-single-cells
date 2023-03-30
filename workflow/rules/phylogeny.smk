@@ -100,8 +100,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         default_likelihoods=",".join(["0.1"] * 10),
     threads: 2
     shell:
-        "( mlr --from {input.all_cells} --tsv cut -x CHROM,POS,REF,ALT "
-        "    then unsparsify --fill-with 'N' "
+        "( mlr --from {input.all_cells} --tsv cut -x -f CHROM,POS,REF,ALT "
         "    then put "
         '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
         '      for (field, value in select($*, func(k,v) {{return k =~ "likelihoods_.*"}}) ) '
