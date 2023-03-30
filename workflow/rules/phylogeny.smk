@@ -72,7 +72,7 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 10,
+        runtime=lambda wildcards, attempt: attempt * 20,
         # input.size_mb is only queried for the first input file for the group job, so we
         # need to account for the number of executions of this rule which each adds another
         # single cell to from this individual
