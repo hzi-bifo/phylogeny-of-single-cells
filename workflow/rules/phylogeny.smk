@@ -72,7 +72,11 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        mem_mb=lambda wildcards, attempt, input: attempt * input.size_mb * 2,
+        runtime=lambda wildcards, attempt: attempt * 10,
+        # input.size_mb is only queried for the first input file for the group job, so we
+        # need to account for the number of executions of this rule which each adds another
+        # single cell to from this individual
+        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
     threads: 2
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {input.sc} CHROM,POS {input.previous_cells} | " 
@@ -88,7 +92,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     input:
         all_cells=lambda wc: expand(
             "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
-            cells=".".join( samples.loc[ (samples["individual"] == wc.individual) & (samples["sample_type"] == "single_cell"), "sample_name"] )
+            cells=".".join( get_single_cells_for_individual(wc.individual) )
         ),
     output:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
@@ -99,6 +103,9 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         "../envs/miller.yaml"
     params:
         default_likelihoods=",".join(["0.1"] * 10),
+    resources:
+        runtime=lambda wc, attempt: attempt * 4 * len( get_single_cells_for_individual(wc.individual)),
+        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
     threads: 2
     shell:
         "( mlr --from {input.all_cells} --tsv cut -x -f CHROM,POS,REF,ALT "

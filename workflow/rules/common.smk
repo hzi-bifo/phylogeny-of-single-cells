@@ -107,6 +107,11 @@ def get_final_output():
 
     return final_output
 
+#### helper functions
+
+def get_single_cells_for_individual(individual):
+    return samples.loc[ (samples["individual"] == individual) & (samples["sample_type"] == "single_cell"), "sample_name"]
+
 
 #### input functions
 
