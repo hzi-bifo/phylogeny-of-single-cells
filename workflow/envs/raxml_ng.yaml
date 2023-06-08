@@ -3,26 +3,4 @@ channels:
   - bioconda
   - nodefaults
 dependencies:
-  ## libpll-2
-  # libpll-2 seems to use gcc, contained in this compiler set
-  # if added to bioconda, make this {{ compiler('c') }}
-  - gcc
-  # libpll-2 dependencies (also in raxml-ng bioconda recipe)
-  - bison==3.4
-  - flex 
-  # other libpll-2 dependencies (not in raxml-ng bioconda recipe, maybe add?)
-  - autoconf
-  - automake
-  - libtool
-  ## raxml-ng
-  # raxml-ng itself and most of the libraries seem to use gxx, contained
-  # in this compiler set
-  - gxx
-  # other raxml-ng dependencies (also in raxml-ng bioconda recipe)
-  - cmake
-  - make
-  ## terraphast-one
-  # terraphast-one dependency, I think (also in raxml-ng bioconda recipe)
-  - gmp
-# use raxml-ng=1.2 once this is released, as it should fix CATG file handling
-#  - raxml-ng =1.2
+  - raxml-ng =1.2
