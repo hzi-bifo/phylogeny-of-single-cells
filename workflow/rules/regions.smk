@@ -17,6 +17,28 @@ rule build_sample_regions:
         "v1.21.1/bio/mosdepth"
 
 
+# TODO: use this rule instead of build_sample_regions
+# TODO: make minimum coverage per-sample configurable via config
+rule build_sample_regions_cov_2:
+    input:
+        bam="results/recal/{sample}.sorted.bam",
+        bai="results/recal/{sample}.sorted.bai",
+    output:
+        "results/regions/{individual}/{sample}.cov_2.mosdepth.global.dist.txt",
+        "results/regions/{individual}/{sample}.cov_2.quantized.bed.gz",
+        summary="results/regions/{individual}/{sample}.cov_2.mosdepth.summary.txt",  # this named output is required for prefix parsing
+    log:
+        "logs/mosdepth/regions/{individual}_{sample}.cov_2.log",
+    params:
+        extra="--no-per-base",
+        quantize="2:",
+    resources:
+        runtime=lambda wc, attempt: attempt * 30 - 1,
+    wrapper:
+        "v1.21.1/bio/mosdepth"
+
+
+
 rule merge_individual_regions:
     input:
         lambda wc: expand(
