@@ -143,7 +143,7 @@ rule concat_raxml_ng_input_sites:
         "  >{output}; "
         "  CELLS=$(head -n 1 {output} | wc -w); "
         "  SITES=$(tail -n +2 {output} | wc -l); "
-        '  sed -i -e "1i\\$CELLS\\t$SITES" {output} '
+        '  sed -i -e "1i\\\\$CELLS\\t$SITES" {output} '
         ") 2>{log}"
 
 
