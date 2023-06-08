@@ -43,6 +43,8 @@ rule freebayes_per_region:
     params:
         # genotyping is performed by prosolo, hence we deactivate it in freebayes by 
         # always setting --pooled-continuous
+        # TODO: make minimum coverage per-sample configurable via config (--min-alternate-count)
+        # TODO: make minimum total coverage across samples configurable via config (--min-alternate-total)
         extra="--pooled-continuous --use-best-n-alleles 4 --min-alternate-count 2 --min-alternate-total 4 --min-alternate-fraction {}".format(
             config["freebayes"].get("min_alternate_fraction", "0.005"),
         ),
