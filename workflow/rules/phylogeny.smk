@@ -33,7 +33,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         # keep it here for now to avoid rerunning already done prosolo calling
         "( vembrane filter 'REF != \"N\" and ALT != \"N\"'"
         "    <( bcftools view --samples {wildcards.sc} {input.calls} | "
-        "       bcftools view --include 'FORMAT/DP[0]>=1' | "
+        "       bcftools view --include 'FORMAT/DP[0]>=4' | "
         "       varlociraptor decode-phred "
         "     ) |"
         "  vembrane table "
