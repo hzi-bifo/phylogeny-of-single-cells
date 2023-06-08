@@ -65,7 +65,7 @@ rule join_one_more_cell:
         sc="results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{sc}_{ref_alt}.tsv",
         previous_cells="results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}_{ref_alt}.tsv",
     output:
-        "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv",
+        temp("results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv"),
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv.log",
     group: "ref_alt_per_individual"
