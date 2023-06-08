@@ -104,7 +104,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     params:
         default_likelihoods=",".join(["0.1"] * 10),
     resources:
-        runtime=lambda wc, attempt: attempt * 4 * len( get_single_cells_for_individual(wc.individual)),
+        runtime=lambda wc, attempt: attempt * 8 * len( get_single_cells_for_individual(wc.individual)),
         mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
     threads: 2
     shell:
