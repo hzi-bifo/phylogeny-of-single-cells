@@ -170,7 +170,7 @@ rule raxml_ng_parse:
 rule raxml_ng:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-        log="logs/raxml_ng_parse/{individual}.raxml.log",
+        log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
         best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed",
