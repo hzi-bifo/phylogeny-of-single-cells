@@ -151,8 +151,7 @@ rule raxml_ng_parse:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
     output:
-        rba="results/raxml_ng_parse/{individual}.raxml.rba",
-        log="logs/raxml_ng_parse/{individual}.raxml.log",
+        "results/raxml_ng_parse/{individual}.raxml.log",
     log:
         "logs/raxml_ng_parse/{individual}.raxml.error.log",
     conda:
