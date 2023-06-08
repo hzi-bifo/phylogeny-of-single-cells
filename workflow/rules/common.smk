@@ -226,9 +226,9 @@ def get_raxml_ng_mem_mb(wildcards, input):
         for line in log:
             if line.startswith("* Estimated memory requirements                : "):
                 m = re.search(
-                    r"* Estimated memory requirements                : (\d+) MB", line
+                    r"\* Estimated memory requirements                : (\d+) MB", line
                 )
-                return int(m.group(0)) + 1000
+                return int(m.group(1)) * 8
 
 
 def get_raxml_ng_prefix(wildcards, output):
@@ -242,6 +242,6 @@ def get_raxml_ng_threads(wildcards, input):
         for line in log:
             if line.startswith("* Recommended number of threads / MPI processes: "):
                 m = re.search(
-                    r"* Recommended number of threads / MPI processes: (\d+)", line
+                    r"\* Recommended number of threads / MPI processes: (\d+)", line
                 )
-                return int(m.group(0))
+                return int(m.group(1))
