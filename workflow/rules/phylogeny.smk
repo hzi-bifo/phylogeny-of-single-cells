@@ -159,6 +159,10 @@ rule raxml_ng_parse:
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
+    resources:
+        runtime=lambda wildcards, attempt: attempt * 60 - 1,
+        mem_mb=lambda wildcards, attempt, input: attempt * 3 * input.size_mb,
+    threads: 2
     shell:
         "raxml-ng --parse --msa {input.msa} --model {params.model} --prefix {params.prefix} 2>{log}"
 
