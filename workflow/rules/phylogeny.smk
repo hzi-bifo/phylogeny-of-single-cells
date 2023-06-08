@@ -210,7 +210,7 @@ rule raxml_ng_support:
 
 rule raxml_ng_ancestral:
     input:
-        rba="results/raxml_ng_parse/{individual}.raxml.rba",
+        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
         log="logs/raxml_ng_parse/{individual}.raxml.log",
     output:
@@ -228,7 +228,7 @@ rule raxml_ng_ancestral:
     resources:
         mem_mb=get_raxml_ng_mem_mb,
     shell:
-        "raxml-ng --ancestral --msa {input.rba} --tree {input.best_tree} --model {params.model} --prefix {params.prefix} --threads {threads} 2>{log}"
+        "raxml-ng --ancestral --msa {input.msa} --tree {input.best_tree} --model {params.model} --prefix {params.prefix} --threads {threads} 2>{log}"
 
 
 rule prosolo_probs_to_scelestial_genotypes_per_cell:
