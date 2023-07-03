@@ -189,9 +189,11 @@ rule raxml_ng:
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
-    threads: get_raxml_ng_threads
+#    threads: get_raxml_ng_threads
+    threads: 16
     resources:
         mem_mb=get_raxml_ng_mem_mb,
+        runtime=lambda wildcards, attempt: attempt * 60 * 10 - 1,
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "
