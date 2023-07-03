@@ -27,7 +27,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         prefix=lambda wc, output: path.dirname(output.ml[0]) + f"/{wc.sc}",
     threads: 4
     resources:
-        runtime=lambda wildcards, attempt: attempt * 30 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 - 1,
     shell:
         # TODO: do bcftools view filtering for {sc} and coverage in in {sc} before prosolo calling, but
         # keep it here for now to avoid rerunning already done prosolo calling
