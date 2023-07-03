@@ -193,7 +193,15 @@ rule raxml_ng:
     resources:
         mem_mb=get_raxml_ng_mem_mb,
     shell:
-        "raxml-ng --all --prob-msa --msa {input.rsa} --model {params.model} --prefix {params.prefix} --threads {threads} --tree pars{{50}},rand{{50}} 2>{log}"
+        "raxml-ng --all "
+        "  --msa {input.msa} "
+        "  --model {params.model} "
+        "  --prefix {params.prefix} "
+        "  --prob-msa on "
+        "  --threads {threads} "
+        "  --tree pars{{1}} "
+        "  --log DEBUG "
+        "2>{log}"
 
 
 rule raxml_ng_support:
