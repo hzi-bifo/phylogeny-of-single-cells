@@ -110,14 +110,17 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     threads: 2
     shell:
         "( mlr --from {input.all_cells} --tsv cut -x -f CHROM,POS,REF,ALT "
-        "    then put "
-        '      \'$gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
+        "    then put ' "
+        '      $gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
+        '      $clear_evidence = gssub( gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "clear_evidence_.*"}}) ), "," ), ",", "" ), "N", ""); '
         '      for (field, value in select($*, func(k,v) {{return k =~ "likelihoods_.*"}}) ) '
         '        {{ $[field] = ssub(value, "N", "{params.default_likelihoods}" ) }}; '
-        '        $without_n = gssub($gt, "N", "");\' '
-        '    then filter \'$without_n != ""; '
-        '        $without_1 = gsub($without_n, $without_n[1], ""); '
-        '        $without_1 != "";\' '
+        "      ' "
+        '    then filter \' $clear_evidence != ""; \' '
+        "    then put ' "
+        '       $clear_evidence_second = gsub($clear_evidence, $clear_evidence[1], ""); '
+        "       ' "
+        '    then filter \' $clear_evidence_second != ""; \' '
         "    then cut -r -f '^gt$,^likelihoods_.*$' "
         "    then reorder -f gt "
         "  >{output} "
