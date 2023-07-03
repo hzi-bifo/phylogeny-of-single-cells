@@ -46,15 +46,16 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         "                $[$REF] = $HOM_REF; "
         "                $[$het_IUPAC] = $HET; "
         "                $[$ALT] = $HOM_ALT; "
-        "                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], \",\"); "
+        '                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], ","); '
         "                $MAX = max($HOM_REF, $HET, $HOM_ALT); "
-        "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; }} "
-        "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT }} "
-        "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT }};' "
+        '                $clear_evidence_{wildcards.sc} = "N"; '
+        "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; if ($HOM_REF > 0.95) {{ $clear_evidence_{wildcards.sc} = $REF }} }} "
+        "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT; if ($HET > 0.95) {{ $clear_evidence_{wildcards.sc} = $het_IUPAC }} }} "
+        "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT; if ($HOM_ALT > 0.95) {{ $clear_evidence_{wildcards.sc} = $ALT }} }};' "
         "      then join -j REF,ALT -r ONE,TWO --lp ml_ -f {input.genotype_mapping} "
-        "      then cut -f CHROM,POS,REF,ALT,ml_IUPAC,likelihoods_{wildcards.sc} "
+        "      then cut -f CHROM,POS,REF,ALT,clear_evidence_{wildcards.sc},ml_IUPAC,likelihoods_{wildcards.sc} "
         "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
-        "      then reorder -f CHROM,POS,REF,ALT,ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
+        "      then reorder -f CHROM,POS,REF,ALT,clear_evidence_{wildcards.sc},ml_genotype_{wildcards.sc},likelihoods_{wildcards.sc} "
         "      then split --prefix {params.prefix} -g REF,ALT"
         ") 2> {log}"
 
