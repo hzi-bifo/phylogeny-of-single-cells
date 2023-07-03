@@ -165,7 +165,7 @@ rule raxml_ng_parse:
         prefix=get_raxml_ng_prefix,
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
-        mem_mb=lambda wildcards, attempt, input: attempt * 3 * input.size_mb,
+        mem_mb=lambda wildcards, attempt, input: attempt * 10 * input.size_mb,
     threads: 2
     shell:
         "raxml-ng --parse --msa {input.msa} --model {params.model} --prefix {params.prefix} 2>{log}"
