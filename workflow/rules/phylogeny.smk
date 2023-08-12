@@ -31,6 +31,11 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
     shell:
         # TODO: do bcftools view filtering for {sc} and coverage in in {sc} before prosolo calling, but
         # keep it here for now to avoid rerunning already done prosolo calling
+        # background info (TL;DR: we expect linear runtime increases in RAxML-NG
+        # with added sites): "Indeed, the amount of work to be done is roughly
+        # proportional to the number of patterns for a fixed number of taxa."
+        # Pfeiffer and Stamatakis, 2010 ("Hybrid MPI/Pthreads Parallelization of
+        # the RAxML Phylogenetics Code")
         "( vembrane filter 'REF != \"N\" and ALT != \"N\"'"
         "    <( bcftools view --samples {wildcards.sc} {input.calls} | "
         "       bcftools view --include 'FORMAT/DP[0]>=4' | "
