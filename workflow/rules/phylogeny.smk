@@ -108,7 +108,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     conda:
         "../envs/miller.yaml"
     params:
-        default_likelihoods=",".join(["0.1"] * 10),
+        default_likelihoods=",".join(["0.01"] * 10),
     resources:
         runtime=lambda wc, attempt: attempt * 8 * len( get_single_cells_for_individual(wc.individual)),
         mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
