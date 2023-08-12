@@ -225,6 +225,9 @@ rule raxml_ng:
         "  --model {params.model}{params.invariant_sites} "
         "  --prefix {params.prefix} "
         "  --prob-msa on "
+        "  --threads auto{{{threads}}} "
+        "  --tree pars{{5}},rand{{5}} "
+        "  --bs-trees autoMRE{{10}} "
         "  --redo "
         "2>{log}"
 
