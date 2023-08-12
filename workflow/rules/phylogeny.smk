@@ -225,9 +225,7 @@ rule raxml_ng:
         "  --model {params.model}{params.invariant_sites} "
         "  --prefix {params.prefix} "
         "  --prob-msa on "
-        "  --threads {threads} "
-        "  --tree pars{{1}} "
-        "  --log DEBUG "
+        "  --redo "
         "2>{log}"
 
 
