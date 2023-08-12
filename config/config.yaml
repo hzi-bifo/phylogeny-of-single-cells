@@ -28,6 +28,12 @@ univec:
 min_cov_for_candidate_sites: 4
 min_cells_with_min_cov: 2
 
+# minimum probability of a genotype (HOM_REF, HET, or HOM_ALT) to be
+# considered clear evidence for that genotype -- at least one cell each
+# with clear evidence for two different genotypes is required for a site
+# to be considered in phylogenetic cell lineage reconstruction
+min_prob_genotype: 0.98
+
 freebayes:
   min_alternate_fraction: 0.005
   chunksize: 200000

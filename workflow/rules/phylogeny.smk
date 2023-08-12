@@ -25,6 +25,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         likelihoods_init=lambda wc, input: "$" + "=0.0; $".join(next(csv.reader(open(input.genotype_order)))) + "=0.0;",
         likelihoods_join=lambda wc, input: "$" + ",$".join(next(csv.reader(open(input.genotype_order)))),
         prefix=lambda wc, output: path.dirname(output.ml[0]) + f"/{wc.sc}",
+        min_prob_genotype=config.get("min_prob_genotype", 0.98)
     threads: 4
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
@@ -54,9 +55,9 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         '                $likelihoods_{wildcards.sc}=joinv([{params.likelihoods_join}], ","); '
         "                $MAX = max($HOM_REF, $HET, $HOM_ALT); "
         '                $clear_evidence_{wildcards.sc} = "N"; '
-        "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; if ($HOM_REF > 0.95) {{ $clear_evidence_{wildcards.sc} = $REF }} }} "
-        "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT; if ($HET > 0.95) {{ $clear_evidence_{wildcards.sc} = $het_IUPAC }} }} "
-        "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT; if ($HOM_ALT > 0.95) {{ $clear_evidence_{wildcards.sc} = $ALT }} }};' "
+        "                if ($HOM_REF == $MAX) {{ $ONE = $REF; $TWO = $REF; if ($HOM_REF > {params.min_prob_genotype}) {{ $clear_evidence_{wildcards.sc} = $REF }} }} "
+        "                  elif ($HET == $MAX) {{ $ONE = $REF; $TWO = $ALT; if ($HET > {params.min_prob_genotype}) {{ $clear_evidence_{wildcards.sc} = $het_IUPAC }} }} "
+        "                  elif ($HOM_ALT ==$MAX) {{ $ONE = $ALT; $TWO = $ALT; if ($HOM_ALT > {params.min_prob_genotype}) {{ $clear_evidence_{wildcards.sc} = $ALT }} }};' "
         "      then join -j REF,ALT -r ONE,TWO --lp ml_ -f {input.genotype_mapping} "
         "      then cut -f CHROM,POS,REF,ALT,clear_evidence_{wildcards.sc},ml_IUPAC,likelihoods_{wildcards.sc} "
         "      then rename ml_IUPAC,ml_genotype_{wildcards.sc} "
