@@ -16,7 +16,11 @@ ref:
   build: GRCh38
 
 univec:
+  # add the UniVec reference sequences of common lab contaminants to the
+  # reference genome used for mapping
   activate: True
+  # restrict the UniVec reference sequences to the core set of common lab
+  # contaminants
   core: True
 
 ### params section, alphabetically sorted
