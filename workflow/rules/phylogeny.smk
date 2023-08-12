@@ -134,7 +134,8 @@ rule concat_raxml_ng_input_sites:
             ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
         ),
     output:
-        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        catg="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        variant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
     log:
         "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg.log",
     conda:
@@ -144,16 +145,30 @@ rule concat_raxml_ng_input_sites:
         "( xsv cat rows --delimiter '\\t' {input} | "
         "    xsv fmt --out-delimiter '\\t' | "
         "    sed -e '1s/gt\\t//' -e '1s/likelihoods_//g' "
-        "  >{output}; "
-        "  CELLS=$(head -n 1 {output} | wc -w); "
-        "  SITES=$(tail -n +2 {output} | wc -l); "
-        '  sed -i -e "1i\\\\$CELLS\\t$SITES" {output} '
+        "  >{output.catg}; "
+        "  CELLS=$(head -n 1 {output.catg} | wc -w); "
+        "  SITES=$(tail -n +2 {output.catg} | wc -l); "
+        "  echo $SITES > {output.variant_sites}; "
+        '  sed -i -e "1i\\\\$CELLS\\t$SITES" {output.catg} '
         ") 2>{log}"
+
+
+rule calculate_invariant_sites:
+    input:
+        variant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
+        covered_sites="results/regions/{individual}.min_cov_for_candidate_sites.covered_sites.txt",
+    output:
+        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
+    log:
+        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.log",
+    shell:
+        "echo $(($(cat {input.covered_sites})-$(cat {input.variant_sites}))) >{output.invariant_sites} 2>{log}"
 
 
 rule raxml_ng_parse:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
     output:
         "results/raxml_ng_parse/{individual}.raxml.log",
     log:
@@ -162,18 +177,20 @@ rule raxml_ng_parse:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
+        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
         mem_mb=lambda wildcards, attempt, input: attempt * 10 * input.size_mb,
     threads: 2
     shell:
-        "raxml-ng --parse --msa {input.msa} --model {params.model} --prefix {params.prefix} 2>{log}"
+        "raxml-ng --parse --msa {input.msa} --model {params.model}{params.invariant_sites} --prefix {params.prefix} 2>{log}"
 
-
+# TODO: parallelise manually via separate rules for initial ML searches, bootstrapping, and thorought ML searches
 rule raxml_ng:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
         log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
@@ -188,6 +205,7 @@ rule raxml_ng:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
+        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
     threads: 16
@@ -197,7 +215,7 @@ rule raxml_ng:
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "
-        "  --model {params.model} "
+        "  --model {params.model}{params.invariant_sites} "
         "  --prefix {params.prefix} "
         "  --prob-msa on "
         "  --threads {threads} "
@@ -237,12 +255,13 @@ rule raxml_ng_ancestral:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
+        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
     threads: get_raxml_ng_threads
     resources:
         mem_mb=get_raxml_ng_mem_mb,
     shell:
-        "raxml-ng --ancestral --msa {input.msa} --tree {input.best_tree} --model {params.model} --prefix {params.prefix} --threads {threads} 2>{log}"
+        "raxml-ng --ancestral --msa {input.msa} --tree {input.best_tree} --model {params.model}{params.invariant_sites} --prefix {params.prefix} --threads {threads} 2>{log}"
 
 
 rule prosolo_probs_to_scelestial_genotypes_per_cell:

@@ -21,6 +21,9 @@ univec:
 
 ### params section, alphabetically sorted
 
+min_cov_for_candidate_sites: 4
+min_cells_with_min_cov: 2
+
 freebayes:
   min_alternate_fraction: 0.005
   chunksize: 200000
@@ -33,4 +36,4 @@ picard:
   markduplicates: "--VALIDATION_STRINGENCY LENIENT"
 
 raxml_ng:
-  model: "GTGTR+FO"
+  model: "GTGTR+FO+ASC_FELS{count_invariants}"

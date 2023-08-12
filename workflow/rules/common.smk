@@ -159,13 +159,14 @@ def get_processed_consensus_input(wildcards):
 def get_individual_samples(individual):
     return samples.loc[samples["individual"] == individual]["sample_name"]
 
+def get_individual_samples_sample_type(individual, sample_type):
+    return samples.loc[
+        (samples["individual"] == individual)
+        & (samples["sample_type"] == sample_type)
+    ]["sample_name"]
 
 def get_individual_bulk_samples_bam(wildcards):
-    bulk_samples = samples.loc[
-        (samples["individual"] == wildcards.individual)
-        & (samples["sample_type"] == "bulk")
-    ]["sample_name"]
-    return expand("results/recal/{b}.sorted.bam", b=bulk_samples)
+    return expand("results/recal/{b}.sorted.bam", b=get_individual_samples_sample_type(wildcards.individual, "bulk"))
 
 
 def aggregate_freebayes_region_calls_input(ext=".bcf"):
@@ -235,6 +236,14 @@ def get_raxml_ng_prefix(wildcards, output):
     return path.join(
         path.dirname(output[0]), path.basename(output[0]).rsplit(".raxml.")[0]
     )
+
+
+def get_raxml_ng_invariant_sites(wildcards, input):
+    with open(input.invariant_sites) as invariant_sites:
+        num_sites=invariant_sites.readline().strip()
+        if invariant_sites.readline():
+            raise AssertionError(f"File '{input.invariant_sites}' should contain one value in one row. More than one row found.")
+        return f"+ASC_FELS{{{num_sites}}}"
 
 
 def get_raxml_ng_threads(wildcards, input):
