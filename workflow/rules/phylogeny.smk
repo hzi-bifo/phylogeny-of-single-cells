@@ -194,11 +194,13 @@ rule raxml_ng:
         log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
+        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees", # does not seem to exist with a single starting tree
         best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed",
         best_model="results/raxml_ng/{individual}.raxml.bestModel",
         bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
         start_trees="results/raxml_ng/{individual}.raxml.startTree",
-        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees",
+        support="results/raxml_ng/{individual}.raxml.support",
+        log="results/raxml_ng/{individual}.raxml.log",
     log:
         "logs/raxml_ng/{individual}.raxml.error.log",
     conda:
