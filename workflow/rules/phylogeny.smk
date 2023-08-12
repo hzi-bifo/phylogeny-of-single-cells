@@ -208,10 +208,10 @@ rule raxml_ng:
         invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
-    threads: 16
+    threads: 24
     resources:
         mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 10 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 * 48 - 1,
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "

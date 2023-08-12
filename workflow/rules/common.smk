@@ -229,7 +229,7 @@ def get_raxml_ng_mem_mb(wildcards, input):
                 m = re.search(
                     r"\* Estimated memory requirements                : (\d+) MB", line
                 )
-                return int(m.group(1)) * 8
+                return int(m.group(1)) * 32
 
 
 def get_raxml_ng_prefix(wildcards, output):
