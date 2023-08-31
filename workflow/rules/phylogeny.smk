@@ -223,12 +223,13 @@ rule raxml_ng:
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "
-        "  --model {params.model}{params.invariant_sites} "
+        "  --model {params.model} "
+        "  --blmin 1e-9 "
         "  --prefix {params.prefix} "
         "  --prob-msa on "
         "  --threads auto{{{threads}}} "
-        "  --tree pars{{5}},rand{{5}} "
-        "  --bs-trees autoMRE{{10}} "
+        "  --tree pars{{50}},rand{{50}} "
+        "  --bs-trees autoMRE{{1000}} "
         "  --redo "
         "2>{log}"
 
