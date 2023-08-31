@@ -28,7 +28,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         min_prob_genotype=config.get("min_prob_genotype", 0.98)
     threads: 4
     resources:
-        runtime=lambda wildcards, attempt: attempt * 60 - 1,
+        runtime=lambda wildcards, attempt: attempt * 120 - 1,
     shell:
         # TODO: do bcftools view filtering for {sc} and coverage in in {sc} before prosolo calling, but
         # keep it here for now to avoid rerunning already done prosolo calling
