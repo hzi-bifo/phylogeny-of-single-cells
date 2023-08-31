@@ -200,8 +200,8 @@ rule raxml_ng:
         log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
-        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees", # does not seem to exist with a single starting tree
-        best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed",
+        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees", # is not produced with a single starting tree
+#        best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed", # is not always produced
         best_model="results/raxml_ng/{individual}.raxml.bestModel",
         bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
         start_trees="results/raxml_ng/{individual}.raxml.startTree",
