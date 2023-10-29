@@ -159,22 +159,9 @@ rule concat_raxml_ng_input_sites:
         ") 2>{log}"
 
 
-rule calculate_invariant_sites:
-    input:
-        variant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
-        covered_sites="results/regions/{individual}.min_cov_for_candidate_sites.covered_sites.txt",
-    output:
-        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
-    log:
-        "results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.log",
-    shell:
-        "echo $(($(cat {input.covered_sites})-$(cat {input.variant_sites}))) >{output.invariant_sites} 2>{log}"
-
-
 rule raxml_ng_parse:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
     output:
         "results/raxml_ng_parse/{individual}.raxml.log",
     log:
@@ -183,7 +170,6 @@ rule raxml_ng_parse:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
-        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
     resources:
         runtime=lambda wildcards, attempt: attempt * 60 - 1,
@@ -192,7 +178,7 @@ rule raxml_ng_parse:
     shell:
         "(raxml-ng --parse "
         "  --msa {input.msa} "
-        "  --model {params.model}{params.invariant_sites} "
+        "  --model {params.model} "
         "  --prefix {params.prefix} "
         ") 2>{log}"
 
@@ -200,7 +186,6 @@ rule raxml_ng_parse:
 rule raxml_ng:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-        invariant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.invariant_sites.txt",
         log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
@@ -217,7 +202,6 @@ rule raxml_ng:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
-        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
     threads: 24
@@ -253,7 +237,6 @@ rule raxml_ng_ancestral:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
-        invariant_sites=get_raxml_ng_invariant_sites,
         prefix=get_raxml_ng_prefix,
     threads: get_raxml_ng_threads
     resources:
@@ -262,7 +245,7 @@ rule raxml_ng_ancestral:
         "(raxml-ng --ancestral "
         "  --msa {input.msa} "
         "  --tree {input.best_tree} "
-        "  --model {params.model}{params.invariant_sites} "
+        "  --model {params.model} "
         "  --prefix {params.prefix} "
         "  --threads {threads} "
         ") 2>{log}"
