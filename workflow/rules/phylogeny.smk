@@ -238,22 +238,6 @@ rule raxml_ng:
         "2>{log}"
 
 
-rule raxml_ng_support:
-    input:
-        best_tree="results/raxml_ng/{individual}.raxml.bestTree",
-        bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
-    output:
-        support="results/raxml_ng_support/{individual}.raxml.support",
-    log:
-        "logs/raxml_ng_support/{individual}.raxml.error.log",
-    conda:
-        "../envs/raxml_ng.yaml"
-    params:
-        prefix=get_raxml_ng_prefix,
-    shell:
-        "raxml-ng --support --tree {input.best_tree} --bs-trees {input.bootstraps} --prefix {params.prefix} 2>{log}"
-
-
 rule raxml_ng_ancestral:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
