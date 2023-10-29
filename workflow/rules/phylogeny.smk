@@ -226,7 +226,7 @@ rule raxml_ng_ancestral:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
         best_tree="results/raxml_ng/{individual}.raxml.bestTree",
-        log="logs/raxml_ng_parse/{individual}.raxml.log",
+        log="results/raxml_ng_parse/{individual}.raxml.log",
     output:
         ancestral_tree="results/raxml_ng_ancestral/{individual}.raxml.ancestralTree",
         ancestral_states="results/raxml_ng_ancestral/{individual}.raxml.ancestralStates",
