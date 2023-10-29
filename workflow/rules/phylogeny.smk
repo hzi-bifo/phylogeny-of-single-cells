@@ -190,7 +190,11 @@ rule raxml_ng_parse:
         mem_mb=lambda wildcards, attempt, input: attempt * 10 * input.size_mb,
     threads: 2
     shell:
-        "raxml-ng --parse --msa {input.msa} --model {params.model}{params.invariant_sites} --prefix {params.prefix} 2>{log}"
+        "(raxml-ng --parse "
+        "  --msa {input.msa} "
+        "  --model {params.model}{params.invariant_sites} "
+        "  --prefix {params.prefix} "
+        ") 2>{log}"
 
 # TODO: parallelise manually via separate rules for initial ML searches, bootstrapping, and thorought ML searches
 rule raxml_ng:
@@ -271,7 +275,13 @@ rule raxml_ng_ancestral:
     resources:
         mem_mb=get_raxml_ng_mem_mb,
     shell:
-        "raxml-ng --ancestral --msa {input.msa} --tree {input.best_tree} --model {params.model}{params.invariant_sites} --prefix {params.prefix} --threads {threads} 2>{log}"
+        "(raxml-ng --ancestral "
+        "  --msa {input.msa} "
+        "  --tree {input.best_tree} "
+        "  --model {params.model}{params.invariant_sites} "
+        "  --prefix {params.prefix} "
+        "  --threads {threads} "
+        ") 2>{log}"
 
 
 rule prosolo_probs_to_scelestial_genotypes_per_cell:
