@@ -56,7 +56,7 @@ rule bwa_index:
     params:
         algorithm="bwtsw",
     resources:
-        runtime=119,
+        runtime=lambda wildcards, attempt: 4 * attempt * 60 - 1,
         mem_mb=9000,
     wrapper:
         "v1.21.1/bio/bwa/index"
@@ -102,7 +102,7 @@ rule get_known_variants:
         build=config["ref"]["build"],
         type="all",
     resources:
-        runtime=lambda wc, attempt: attempt * 40 - 1,
+        runtime=lambda wc, attempt: attempt * 59 - 1,
     cache: True
     wrapper:
         "v1.21.1/bio/reference/ensembl-variation"
@@ -116,7 +116,7 @@ rule remove_iupac_codes:
     log:
         "logs/rbt/remove_iupac_codes.log",
     resources:
-        runtime=lambda wc, attempt: attempt * 80 - 1,
+        runtime=lambda wc, attempt: attempt * 60 * 3 - 1,
     conda:
         "../envs/rbt.yaml"
     cache: True

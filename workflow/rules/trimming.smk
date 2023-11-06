@@ -9,7 +9,7 @@ rule cutadapt:
         # https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types
         adapters=get_cutadapt_parameters,
     resources:
-        runtime=lambda wildcards, attempt: 2 * attempt * 60 - 1,
+        runtime=lambda wildcards, attempt: 4 * attempt * 60 - 1,
     log:
         "logs/cutadapt/{sample}.{unit}.log",
     threads: 4  # set desired number of threads here
@@ -25,7 +25,7 @@ rule merge_fastqs:
     log:
         "logs/merge-fastqs/{sample}.{read}.log",
     resources:
-        runtime=39,
+        runtime=lambda wildcards, attempt: attempt * 59 - 1,
     wildcard_constraints:
         read="1|2",
     shell:

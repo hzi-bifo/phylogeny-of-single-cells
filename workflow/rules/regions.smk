@@ -12,7 +12,7 @@ rule build_sample_regions:
         extra="--no-per-base",
         quantize="1:",
     resources:
-        runtime=lambda wc, attempt: attempt * 30 - 1,
+        runtime=lambda wc, attempt: attempt * 59 - 1,
     wrapper:
         "v1.21.1/bio/mosdepth"
 
@@ -30,7 +30,7 @@ rule merge_individual_regions:
     conda:
         "../envs/bedtools.yaml"
     resources:
-        runtime=59,
+        runtime=lambda wc, attempt: attempt * 59 * 2 - 1,
     shell:
         "zcat {input} | sort -k1,1 -k2,2n - | mergeBed -i - -d 15000 > {output} 2> {log}"
 
@@ -69,7 +69,7 @@ rule build_sample_regions_cov:
         extra="--no-per-base",
         quantize=f"{config['min_cov_for_candidate_sites']}:",
     resources:
-        runtime=lambda wc, attempt: attempt * 30 - 1,
+        runtime=lambda wc, attempt: attempt * 59 - 1,
     wrapper:
         "v1.21.1/bio/mosdepth"
 
@@ -106,7 +106,7 @@ rule merge_individual_cell_regions_cov:
     conda:
         "../envs/bedtools.yaml"
     resources:
-        runtime=59,
+        runtime=lambda wc, attempt: 59 * 2 * attempt,
     shell:
         "(cat {input.beds} | "
         " sort -k1,1 -k2,2n - | "
@@ -132,7 +132,7 @@ rule merge_individual_bulk_regions_cov:
     conda:
         "../envs/bedtools.yaml"
     resources:
-        runtime=59,
+        runtime=lambda wc, attempt: 59 * 2 * attempt,
     shell:
         "(cat {input.beds} | "
         " sort -k1,1 -k2,2n - | "

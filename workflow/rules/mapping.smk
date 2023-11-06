@@ -11,7 +11,7 @@ rule map_reads:
         sorting="samtools",
         sort_order="coordinate",
     resources:
-        runtime=179,
+        runtime=60 * 4,
         mem_mb=16000,
     threads: 8
     wrapper:
@@ -42,7 +42,7 @@ rule mark_duplicates:
         ),
     resources:
         mem_mb=4096,
-        runtime=119,
+        runtime=60 * 3,
     # TODO: return to using wrapper, once this PR is propagated to the wrapper:
     #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
     script:
@@ -111,7 +111,7 @@ rule apply_bqsr:
         java_opts="-Xmx3072m",
     resources:
         mem_mb=4096,
-        runtime=89,
+        runtime=60 * 2,
     # TODO: return to using wrapper, once this PR is propagated to the wrapper:
     #   https://github.com/snakemake/snakemake-wrapper-utils/pull/24
     script:
@@ -142,6 +142,6 @@ rule bam_index_merged_bulks:
     log:
         "logs/bam_index/merged_bulks/{individual}.merged_bulk.sorted.log",
     resources:
-        runtime=lambda wildcards, attempt: 60 * attempt - 1,
+        runtime=lambda wildcards, attempt: 60 * 2 * attempt - 1,
     wrapper:
         "v1.21.1/bio/samtools/index"

@@ -50,7 +50,7 @@ rule freebayes_per_region:
         ),
     threads: 1
     resources:
-        runtime=lambda wildcards, attempt: 5 * attempt * 60 - 1,
+        runtime=lambda wildcards, attempt: 7 * attempt * 60 - 1,
         mem_mb=lambda wc, attempt: 8000 + 16000 * (attempt - 1),
     shell:
         "(freebayes {params.extra} -r {wildcards.chromosome}:{wildcards.region} -f {input.ref} {input.samples} | "
@@ -67,7 +67,7 @@ rule bcftools_norm_candidate_calls:
     conda:
         "../envs/bcftools.yaml"
     resources:
-        runtime=lambda wildcards, attempt: 30 * attempt - 1,
+        runtime=lambda wildcards, attempt: 59 * attempt - 1,
     shell:
         # TODO: turn off the following atomize and instead activate --do-not-normalize
         # once the ProSolo model ist re-integrated with varlociraptor
@@ -88,7 +88,7 @@ rule bcftools_index_candidate_calls:
     params:
         extra="",  # optional parameters for bcftools index
     resources:
-        runtime=lambda wildcards, attempt: 20 * attempt - 1,
+        runtime=lambda wildcards, attempt: 59 * attempt - 1,
     wrapper:
         "v1.22.0/bio/bcftools/index"
 
@@ -105,7 +105,7 @@ rule aggregate_freebayes_region_calls:
         extra="-a",
     threads: 2
     resources:
-        runtime=lambda wildcards, attempt: 10 * 60 * attempt - 1,
+        runtime=lambda wildcards, attempt: 12 * 60 * attempt - 1,
         mem_mb=lambda wildcards, input, attempt: input.size_mb * 6 * (1 + 0.5 * attempt)
     wrapper:
         "v1.21.1/bio/bcftools/concat"

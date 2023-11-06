@@ -28,7 +28,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         min_prob_genotype=config.get("min_prob_genotype", 0.98)
     threads: 4
     resources:
-        runtime=lambda wildcards, attempt: attempt * 120 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 * 6 - 1,
     shell:
         # TODO: do bcftools view filtering for {sc} and coverage in in {sc} before prosolo calling, but
         # keep it here for now to avoid rerunning already done prosolo calling
@@ -78,7 +78,7 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 20,
+        runtime=lambda wildcards, attempt: attempt * 59,
         # input.size_mb is only queried for the first input file for the group job, so we
         # need to account for the number of executions of this rule which each adds another
         # single cell to from this individual
@@ -109,7 +109,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     params:
         default_likelihoods=",".join(["0.01"] * 10),
     resources:
-        runtime=lambda wc, attempt: attempt * 8 * len( get_single_cells_for_individual(wc.individual)),
+        runtime=lambda wc, attempt: attempt * 15 * len( get_single_cells_for_individual(wc.individual)),
         mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
     threads: 2
     shell:
@@ -170,7 +170,7 @@ rule raxml_ng_parse:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
     resources:
-        runtime=lambda wildcards, attempt: attempt * 60 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 * 2 - 1,
         mem_mb=lambda wildcards, attempt, input: attempt * 10 * input.size_mb,
     threads: 2
     shell:

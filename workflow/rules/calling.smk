@@ -10,7 +10,7 @@ rule scatter_candidate_calls:
     conda:
         "../envs/rbt.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 40 - 1,
+        runtime=lambda wildcards, attempt: attempt * 59 - 1,
         mem_mb=lambda wildcards, input, attempt: input.size_mb * 1.4 * attempt,
     shell:
         "rbt vcf-split {input} {output}"
@@ -34,7 +34,7 @@ rule prosolo_calling:
         extra="",
     threads: 1
     resources:
-        runtime=lambda wildcards, attempt: 6 * attempt * 60 - 1,
+        runtime=lambda wildcards, attempt: 8 * attempt * 60 - 1,
         mem_mb=lambda wildcards, attempt: attempt * 4000,
     log:
         "logs/prosolo/{individual}/{sc}.{scatteritem}.merged_bulk.prosolo.log",
@@ -53,7 +53,7 @@ rule sort_calls:
         "../envs/bcftools.yaml"
     resources:
         mem_mb=4000,
-        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        runtime=lambda wildcards, attempt: 59 * attempt - 1,
     shell:
         "bcftools sort --max-mem {resources.mem_mb}M --temp-dir `mktemp -d` "
         "-Ob {input} > {output} 2> {log}"
@@ -69,7 +69,7 @@ rule bcftools_index_region_calls:
     conda:
         "../envs/bcftools.yaml"
     resources:
-        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        runtime=lambda wildcards, attempt: 59 * attempt - 1,
     shell:
         "bcftools index {input} 2> {log}"
 
@@ -89,7 +89,7 @@ rule aggregate_prosolo_chunk_calls:
     params:
         extra="-a",
     resources:
-        runtime=lambda wildcards, attempt: 40 * attempt - 1,
+        runtime=lambda wildcards, attempt: 59 * attempt - 1,
         mem_mb=lambda wildcards, input, attempt: input.size_mb * (1 + 0.5 * attempt)
     wrapper:
         "v1.21.1/bio/bcftools/concat"
