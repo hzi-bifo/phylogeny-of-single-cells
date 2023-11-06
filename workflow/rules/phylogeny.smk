@@ -202,10 +202,10 @@ rule raxml_ng:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
-    threads: 24
+    threads: 64
     resources:
         mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 48 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3 - 1,
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "
@@ -214,8 +214,10 @@ rule raxml_ng:
         "  --prefix {params.prefix} "
         "  --prob-msa on "
         "  --threads auto{{{threads}}} "
-        "  --tree pars{{50}},rand{{50}} "
-        "  --bs-trees autoMRE{{1000}} "
+        "  --tree pars{{250}},rand{{250}} "
+        "  --extra pars-par " # compute parsimony trees in parallel
+        "  --bs-trees autoMRE{{2500}} "
+        "  --extra bs-start-rand " # try avoiding parsimony bias in tree topology bootstrapping
         "  --redo "
         "2>{log}"
 
