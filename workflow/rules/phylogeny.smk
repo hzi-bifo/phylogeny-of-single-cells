@@ -75,7 +75,6 @@ rule join_one_more_cell:
         temp("results/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv"),
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods/{previous_cells}.{sc}_{ref_alt}.tsv.log",
-    group: "ref_alt_per_individual"
     conda:
         "../envs/xsv_miller.yaml"
     resources:
@@ -105,7 +104,6 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
     log:
         "logs/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg.log",
-    group: "ref_alt_per_individual"
     conda:
         "../envs/miller.yaml"
     params:
