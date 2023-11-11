@@ -78,11 +78,11 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        runtime=lambda wildcards, attempt: attempt * 59 * 2,
+        runtime=lambda wc, attempt: attempt * 59 * 5 * len( get_single_cells_for_individual(wc.individual)),
         # input.size_mb is only queried for the first input file for the group job, so we
         # need to account for the number of executions of this rule which each adds another
         # single cell to from this individual
-        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 2 * len( get_single_cells_for_individual(wc.individual)),
+        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 0.8,
     threads: 2
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {input.sc} CHROM,POS {input.previous_cells} | " 
