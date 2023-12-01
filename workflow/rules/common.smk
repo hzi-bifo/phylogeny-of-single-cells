@@ -123,6 +123,23 @@ def get_single_cells_for_individual(individual):
 #### input functions
 
 
+def get_covered_cells_input(wildcards):
+    # Important: use the method open() of the returned file!
+    # This way, Snakemake is able to automatically download the file if it is generated in
+    # a cloud environment without a shared filesystem.
+    with checkpoints.concatenate_cell_mean_coverages.get(individual=wildcards.individual).output['coverages'].open() as f:
+        covered_cells = list()
+        with open("P_coverages.txt") as f:
+            for line in f:
+            fields = line.split('\t')
+            if float(fields[3]) > 1.5:
+                covered_cells.append(path.basename(fields[0].split(':')[0]).split(".")[0])
+        return expand(
+            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
+            cells=".".join( covered_cells )
+        )
+
+
 def get_multiqc_input(wildcards):
     multiqc_input = []
     multiqc_input.extend(

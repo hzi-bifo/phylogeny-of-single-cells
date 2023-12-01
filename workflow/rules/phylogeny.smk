@@ -94,13 +94,26 @@ rule join_one_more_cell:
         "  >{output} "
         ") 2>{log}"
 
- 
-rule parse_to_raxml_ng_gt_and_likelihoods:
+
+checkpoint concatenate_cell_mean_coverages:
     input:
         all_cells=lambda wc: expand(
-            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
+            "results/regions/{{individual}}/{cells}.mosdepth.summary.txt",
             cells=".".join( get_single_cells_for_individual(wc.individual) )
         ),
+    output:
+        coverages="results/raxml_ng_input/{individual}.single_cell_coverages.txt"
+    log:
+        "logs/raxml_ng_input/{individual}.single_cell_coverages.txt"
+    conda:
+        "../envs/grep.yaml"
+    shell:
+        'grep "^total" {input.all_cells} >{output.coverages}'
+
+
+rule parse_to_raxml_ng_gt_and_likelihoods:
+    input:
+        get_covered_cells_input,
     output:
         "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
     log:

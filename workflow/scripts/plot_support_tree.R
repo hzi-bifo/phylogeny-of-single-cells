@@ -13,7 +13,8 @@ rooting_group <- read_tsv(snakemake@input[["samples"]]) |>
   filter(
     cell_type == "Endothel",
     individual == snakemake@wildcards[["individual"]],
-    sample_type == "single_cell"
+    sample_type == "single_cell",
+    sample_name %in% (support_tree |> as_tibble() |> pull(label))
   ) |>
   pull(sample_name)
 
