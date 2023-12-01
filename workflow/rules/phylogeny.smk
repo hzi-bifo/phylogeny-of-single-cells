@@ -242,7 +242,7 @@ rule raxml_ng:
         "  --threads auto{{{threads}}} "
         "  --tree pars{{250}},rand{{250}} "
         "  --extra pars-par " # compute parsimony trees in parallel
-        "  --bs-trees autoMRE{{2500}} "
+        "  --bs-trees autoMRE{{2000}} "
         "  --extra bs-start-rand " # try avoiding parsimony bias in tree topology bootstrapping
         "  --redo "
         "2>{log}"
