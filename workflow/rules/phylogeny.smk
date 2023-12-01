@@ -110,11 +110,11 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     params:
         default_likelihoods=",".join(["0.01"] * 10),
     resources:
-        runtime=lambda wc, attempt: attempt * 15 * len( get_single_cells_for_individual(wc.individual)),
-        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 0.4,
-    threads: 2
+        runtime=lambda wc, input, attempt: attempt * 3 * input.size_mb,
+        mem_mb=20000,
+    threads: 8
     shell:
-        "( mlr --from {input.all_cells} --tsv cut -x -f CHROM,POS,REF,ALT "
+        "( mlr --nr-progress-mod 100000 --from {input.all_cells} --tsv cut -x -f CHROM,POS,REF,ALT "
         "    then put ' "
         '      $gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
         '      $clear_evidence = gssub( gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "clear_evidence_.*"}}) ), "," ), ",", "" ), "N", ""); '
