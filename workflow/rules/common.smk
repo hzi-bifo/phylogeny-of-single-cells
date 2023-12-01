@@ -73,6 +73,13 @@ def get_final_output():
     for individual in pd.unique(samples.individual):
         final_output.extend(
             expand(
+                "results/trees/max_{max_missing}_missing/{ind}.raxml.support.pdf",
+                max_missing=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "15", "25", "35"],
+                ind=individual,
+            )
+        )
+        final_output.extend(
+            expand(
                 "results/final-calls/{ind}/{sc}.merged_bulk.prosolo.sorted.bcf",
                 ind=individual,
                 sc=samples.loc[
