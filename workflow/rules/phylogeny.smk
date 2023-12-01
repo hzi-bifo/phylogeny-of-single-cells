@@ -82,14 +82,15 @@ rule join_one_more_cell:
         # input.size_mb is only queried for the first input file for the group job, so we
         # need to account for the number of executions of this rule which each adds another
         # single cell to from this individual
-        mem_mb=lambda wc, attempt, input: attempt * input.size_mb * 0.4,
+        mem_mb=lambda wc, attempt, input: attempt * input.size_mb,
     threads: 2
     shell:
         "( xsv join --delimiter '\\t' --full CHROM,POS {input.sc} CHROM,POS {input.previous_cells} | " 
         "    xsv fmt --out-delimiter '\\t' | "
         "    mlr --tsv put 'if ( is_empty($CHROM) ) {{ $CHROM = $CHROM_2; $POS = $POS_2 }};' "
         "    then cut -x -f CHROM_2,POS_2,REF_2,ALT_2 "
-        "    then fill-empty -v 'N' "
+        "    then fill-empty -v 'N' | "
+        "  uniq"
         "  >{output} "
         ") 2>{log}"
 
