@@ -132,19 +132,44 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         ") 2>{log}"
 
 
+rule filter_to_max_missing_cells:
+    input:
+        "results/raxml_ng_input/{individual}/ml_gt_and_likelihoods.{ref_alt}.catg",
+    output:
+        temp("results/raxml_ng_input/{individual}/max_{n_missing_cells}_missing/ml_gt_and_likelihoods.{ref_alt}.catg"),
+    log:
+        "logs/raxml_ng_input/{individual}/max_{n_missing_cells}_missing/ml_gt_and_likelihoods.{ref_alt}.log",
+    conda:
+        "../envs/miller.yaml"
+    params:
+        max_array_length = lambda wc: int(wc.n_missing_cells) + 1,
+        mem_mb=20000,
+    shell:
+        "( mlr --tsv --from {input} filter "
+        "   'length(splita($gt, \"N\")) <= {params.max_array_length}'"
+        "  >{output}; "
+        '  if wc -l {output} | grep -P "^0 "; '
+        "  then "
+        "    head -n 1 {input} >{output}; "
+        "  fi"
+        ") 2>{log} "
+
+
 rule concat_raxml_ng_input_sites:
     input:
         expand(
-            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods.{ref_alt}.catg",
+            "results/raxml_ng_input/{{individual}}/max_{{n_missing_cells}}_missing/ml_gt_and_likelihoods.{ref_alt}.catg",
             ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
         ),
     output:
-        catg="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-        variant_sites="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
+        catg="results/raxml_ng_input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.catg",
+        variant_sites="results/raxml_ng_input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
     log:
-        "logs/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg.log",
+        "logs/raxml_ng_input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.catg.log",
     conda:
         "../envs/xsv_sed.yaml"
+    params:
+        mem_mb=20000,
     threads: 2
     shell:
         "( xsv cat rows --delimiter '\\t' {input} | "
@@ -160,11 +185,11 @@ rule concat_raxml_ng_input_sites:
 
 rule raxml_ng_parse:
     input:
-        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
+        msa="results/raxml_ng_input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.catg",
     output:
-        "results/raxml_ng_parse/{individual}.raxml.log",
+        "results/raxml_ng_parse/max_{n_missing_cells}_missing/{individual}.raxml.log",
     log:
-        "logs/raxml_ng_parse/{individual}.raxml.error.log",
+        "logs/raxml_ng_parse/max_{n_missing_cells}_missing/{individual}.raxml.error.log",
     conda:
         "../envs/raxml_ng.yaml"
     params:
@@ -184,29 +209,29 @@ rule raxml_ng_parse:
 # TODO: parallelise manually via separate rules for initial ML searches, bootstrapping, and thorought ML searches
 rule raxml_ng:
     input:
-        msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
-        log="results/raxml_ng_parse/{individual}.raxml.log",
+        msa="results/raxml_ng_input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.catg",
+        log="results/raxml_ng_parse/max_{n_missing_cells}_missing/{individual}.raxml.log",
     output:
-        best_tree="results/raxml_ng/{individual}.raxml.bestTree",
-        ml_trees="results/raxml_ng/{individual}.raxml.mlTrees", # is not produced with a single starting tree
+        best_tree="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.bestTree",
+        ml_trees="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.mlTrees", # is not produced with a single starting tree
 #        best_tree_collapsed="results/raxml_ng/{individual}.raxml.bestTreeCollapsed", # is not always produced
-        best_model="results/raxml_ng/{individual}.raxml.bestModel",
-        bootstraps="results/raxml_ng/{individual}.raxml.bootstraps",
-        start_trees="results/raxml_ng/{individual}.raxml.startTree",
-        support="results/raxml_ng/{individual}.raxml.support",
-        log="results/raxml_ng/{individual}.raxml.log",
+        best_model="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.bestModel",
+        bootstraps="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.bootstraps",
+        start_trees="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.startTree",
+        support="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.support",
+        log="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.log",
     log:
-        "logs/raxml_ng/{individual}.raxml.error.log",
+        "logs/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.error.log",
     conda:
         "../envs/raxml_ng.yaml"
     params:
         model=config["raxml_ng"].get("model", "GTGTR+FO"),
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
-    threads: 64
+    threads: 32
     resources:
         mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3 - 1,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 4 - 1,
     shell:
         "raxml-ng --all "
         "  --msa {input.msa} "
