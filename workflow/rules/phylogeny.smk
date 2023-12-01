@@ -248,6 +248,20 @@ rule raxml_ng:
         "2>{log}"
 
 
+rule plot_support_tree:
+    input:
+        support="results/raxml_ng/max_{n_missing_cells}_missing/{individual}.raxml.support",
+        samples=config["samples"],
+    output:
+        support="results/trees/max_{n_missing_cells}_missing/{individual}.raxml.support.pdf",
+    log:
+        "logs/trees/max_{n_missing_cells}_missing/{individual}.raxml.support.log",
+    conda:
+        "../envs/ggtree.yaml"
+    script:
+        "../scripts/plot_support_tree.R"
+
+
 rule raxml_ng_ancestral:
     input:
         msa="results/raxml_ng_input/{individual}.ml_gt_and_likelihoods.catg",
