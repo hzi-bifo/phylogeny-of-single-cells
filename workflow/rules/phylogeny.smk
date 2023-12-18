@@ -121,7 +121,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     conda:
         "../envs/miller.yaml"
     params:
-        default_likelihoods=",".join(["0.01"] * 10),
+        flat_prior=get_flat_prior_for_ref_alt,
     resources:
         runtime=lambda wc, input, attempt: attempt * 3 * input.size_mb,
         mem_mb=20000,
