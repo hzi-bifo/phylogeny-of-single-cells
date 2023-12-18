@@ -237,6 +237,43 @@ def get_cutadapt_parameters(wildcards):
     except KeyError:
         return ""
 
+def get_iupac(r, a, mapping):
+    return mapping.loc[
+        (mapping["REF"] == r) &
+            (mapping["ALT"] == a),
+        "IUPAC"
+    ].squeeze()
+
+
+def get_flat_prior_for_ref_alt(wc, input):
+    gt_map = pd.read_csv(
+        input.genotype_mapping,
+        delimiter="\t"
+    )
+    likelihoods=["0.0"] * 10
+    default_likelihood = "0.333333"
+    with open(input.genotype_order) as f:
+        gt_ord = f.readline().split(",")
+    # homozyguous reference
+    likelihoods[
+        gt_ord.index(
+            get_iupac(wc.ref, wc.ref, gt_map)
+        )
+    ] = default_likelihood
+    # heterozyguous
+    likelihoods[
+        gt_ord.index(
+            get_iupac(wc.ref, wc.alt, gt_map)
+        )
+    ] = default_likelihood
+    # homozyguous alternative
+    likelihoods[
+        gt_ord.index(
+            get_iupac(wc.alt, wc.alt, gt_map)
+        )
+    ] = default_likelihood
+    return ",".join(likelihoods)
+
 
 def get_read_group(wildcards):
     """Denote sample name and platform in read group."""

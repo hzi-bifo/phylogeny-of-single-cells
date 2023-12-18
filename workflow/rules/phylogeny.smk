@@ -132,7 +132,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
         '      $gt = gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "ml_genotype_.*"}}) ), "," ), ",", "" ); '
         '      $clear_evidence = gssub( gsub( joinv( get_values( select($*, func(k,v) {{return k =~ "clear_evidence_.*"}}) ), "," ), ",", "" ), "N", ""); '
         '      for (field, value in select($*, func(k,v) {{return k =~ "likelihoods_.*"}}) ) '
-        '        {{ $[field] = ssub(value, "N", "{params.default_likelihoods}" ) }}; '
+        '        {{ $[field] = ssub(value, "N", "{params.flat_prior}" ) }}; '
         "      ' "
         '    then filter \' $clear_evidence != ""; \' '
         "    then put ' "
