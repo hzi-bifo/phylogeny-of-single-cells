@@ -78,7 +78,7 @@ rule join_one_more_cell:
     conda:
         "../envs/xsv_miller.yaml"
     resources:
-        runtime=lambda wc, attempt: attempt * 59 * 5 * len( get_single_cells_for_individual(wc.individual)),
+        runtime=lambda wc, input, attempt: attempt * 0.5 * input.size_mb,
         # input.size_mb is only queried for the first input file for the group job, so we
         # need to account for the number of executions of this rule which each adds another
         # single cell to from this individual
