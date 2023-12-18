@@ -73,14 +73,18 @@ def get_final_output():
     for individual in pd.unique(samples.individual):
         final_output.extend(
             expand(
-                "results/trees/max_{max_missing}_missing/{ind}.raxml.support.pdf",
-                max_missing=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "15", "25", "35"],
+                [
+                    "results/trees/{ind}.max_missing_stable_topology_selection.pdf",
+                    "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.raxml.support.pdf",
+                ],
                 ind=individual,
+                model=config["raxml_ng"]["models"],
+                max_missing=config["raxml_ng"]["max_missing"],
             )
         )
         final_output.extend(
             expand(
-                "results/final-calls/{ind}/{sc}.merged_bulk.prosolo.sorted.bcf",
+                "results/calls/{ind}/{sc}.merged_bulk.prosolo.sorted.bcf",
                 ind=individual,
                 sc=samples.loc[
                     (samples["individual"] == individual)
@@ -88,9 +92,7 @@ def get_final_output():
                 ]["sample_name"],
             )
         )
-    final_output.append("results/qc/multiqc.html")
-
-
+#    final_output.append("results/qc/multiqc.html")
 #
 #    for sample, unit in units.index:
 #        row = units.loc[sample].loc[unit]
@@ -134,7 +136,7 @@ def get_covered_cells_input(wildcards):
             if float(fields[3]) > 1.5:
                 covered_cells.append(path.basename(fields[0].split(':')[0]).split(".")[0])
         return expand(
-            "results/raxml_ng_input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
+            "results/raxml_ng/input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
             cells=".".join( covered_cells )
         )
 
