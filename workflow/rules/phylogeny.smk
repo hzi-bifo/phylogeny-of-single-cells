@@ -123,7 +123,7 @@ rule parse_to_raxml_ng_gt_and_likelihoods:
     params:
         flat_prior=get_flat_prior_for_ref_alt,
     resources:
-        runtime=lambda wc, input, attempt: attempt * 3 * input.size_mb,
+#        runtime=lambda wc, input, attempt: attempt * 0.5 * input.size_mb,
         mem_mb=20000,
     threads: 8
     shell:
