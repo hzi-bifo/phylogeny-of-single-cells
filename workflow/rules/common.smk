@@ -136,7 +136,7 @@ def get_covered_cells_input(wildcards):
             if float(fields[3]) > 1.5:
                 covered_cells.append(path.basename(fields[0].split(':')[0]).split(".")[0])
         return expand(
-            "results/raxml_ng/input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref_alt}}.tsv",
+            "results/raxml_ng/input/{{individual}}/ml_gt_and_likelihoods/{cells}_{{ref}}_{{alt}}.tsv",
             cells=".".join( covered_cells )
         )
 
