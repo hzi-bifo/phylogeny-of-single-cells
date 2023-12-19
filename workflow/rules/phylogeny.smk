@@ -14,7 +14,7 @@ rule prosolo_probs_to_raxml_ng_ml_gt_and_likelihoods_per_cell:
         genotype_order=workflow.source_path("../resources/raxml_ng_genotype_order.csv"),
     output:
         ml=expand(
-            "results/raxml_ng/input/{{individual}}/ml_gt_and_likelihoods/{{sc}}_{ref_alt}.tsv",
+            "results/raxml_ng/{{individual}}/input/{{individual}}.ml_gt_and_likelihoods/{{sc}}_{ref_alt}.tsv",
             ref_alt=[ "_".join([ref, alt]) for ref in NTS for alt in NTS if ref != alt ],
         ),
     log:
