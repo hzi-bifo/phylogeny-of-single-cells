@@ -387,7 +387,7 @@ rule raxml_ng_rfdist_to_tsv:
                     relative_rf_distance = line.split("in this tree set: ")[1].rstrip()
                 elif line.startswith("Number of unique topologies in this tree set:"):
                     unique_topologies = line.split("in this tree set: ")[1].rstrip()
-        with open(output.tsv) as o:
+        with open(output.tsv, mode="w") as o:
             o.write("\t".join(
                 [
                     "inidividual",
