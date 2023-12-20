@@ -390,7 +390,7 @@ rule raxml_ng_rfdist_to_tsv:
         with open(output.tsv, mode="w") as o:
             o.write("\t".join(
                 [
-                    "inidividual",
+                    "individual",
                     "model",
                     "max_missing",
                     "tree_type",
@@ -403,7 +403,7 @@ rule raxml_ng_rfdist_to_tsv:
             o.write("\n")
             o.write("\t".join(
                 [
-                    wildcards.inidividual,
+                    wildcards.individual,
                     wildcards.model,
                     wildcards.max_missing,
                     wildcards.type,
