@@ -375,7 +375,7 @@ rule raxml_ng_rfdist_to_tsv:
     output:
         tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rf_dist.tsv",
     log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rfDistances_to_tsv.log",
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.rfDistances_to_tsv.log",
     run:
         with open(input.rf_dist) as f:
             for line in f:
