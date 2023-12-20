@@ -5,7 +5,7 @@ sink(log, type="message")
 library("tidyverse")
 
 rfs_and_topos <- read_tsv(
-  snakemake@input[["rf_dists"]]
+  snakemake@input[["tsv"]]
 ) |>
   pivot_longer(
     c(
