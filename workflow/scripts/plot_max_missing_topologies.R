@@ -26,8 +26,8 @@ rfs_and_topos <- read_tsv(
     ),
     count_type = case_match(
       label,
-      "total_trees" -> "number of trees",
-      "unique_topologies" -> "number of topologies"
+      "total_trees" ~ "number of trees",
+      "unique_topologies" ~ "number of topologies"
     ),
     tree_type = case_match(
       tree_type,
