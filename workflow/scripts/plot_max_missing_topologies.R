@@ -52,8 +52,9 @@ plot <- ggplot(
   geom_line() +
   geom_point() +
   facet_grid(
-    rows = value_type,
-    cols = model
+    rows = vars(value_type),
+    cols = vars(model),
+    scales = "free_y"
   )
 
 ggsave(
