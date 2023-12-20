@@ -353,9 +353,10 @@ rule raxml_ng_rfdist_across_trees:
             infix="bootstraps" if wc.type == "bootstraps" else "search",
         ),
     output:
-        "results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rfDistances",
+        rf_dist="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.rfDistances",
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.log",
     log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rfDistances.log",
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.rfDistances.log",
     conda:
         "../envs/raxml_ng.yaml"
     params:
