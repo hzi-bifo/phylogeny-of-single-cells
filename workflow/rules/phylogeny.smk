@@ -263,7 +263,7 @@ rule raxml_ng_bootstrap:
         log="results/raxml_ng/{individual}/parse/{model}/max_{n_missing_cells}_missing/{individual}.raxml.log",
     output:
         bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
-        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.boostraps.raxml.log",
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.log",
     log:
         "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.error.log",
     conda:
