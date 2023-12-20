@@ -405,7 +405,7 @@ rule raxml_ng_rfdist_to_tsv:
                 [
                     wildcards.individual,
                     wildcards.model,
-                    wildcards.max_missing,
+                    wildcards.n_missing_cells,
                     wildcards.type,
                     total_trees,
                     absolute_rf_distance,
