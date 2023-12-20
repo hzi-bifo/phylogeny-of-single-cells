@@ -371,7 +371,7 @@ rule raxml_ng_rfdist_across_trees:
 
 rule raxml_ng_rfdist_to_tsv:
     input:
-        rf_dist="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.rfDistances.log",
+        rf_dist="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.rf_dist.raxml.log",
     output:
         tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rf_dist.tsv",
     log:
