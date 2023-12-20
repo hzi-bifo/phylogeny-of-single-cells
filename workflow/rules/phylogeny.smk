@@ -338,7 +338,7 @@ rule raxml_ng_support:
         runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
     shell:
         "raxml-ng --support "
-        "  --trees {input.best_tree} "
+        "  --tree {input.best_tree} "
         "  --bs-trees {input.bootstraps} "
         "  --prefix {params.prefix} "
         "  --bs-metric tbe "
