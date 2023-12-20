@@ -43,7 +43,7 @@ plot <- ggplot(
     x = max_missing,
     y = value,
     color = tree_type,
-    symbol = count_type
+    shape = count_type
   )
 ) +
   scale_color_brewer(
