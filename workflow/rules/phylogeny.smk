@@ -382,11 +382,11 @@ rule raxml_ng_rfdist_to_tsv:
                 if line.startswith("Loaded "):
                     total_trees = line.split("Loaded ")[1].split(" trees with ")[0]
                 elif line.startswith("Average absolute RF distance in this tree set:"):
-                    absolute_rf_distance = line.split("in this tree set: ")[1]
+                    absolute_rf_distance = line.split("in this tree set: ")[1].rstrip()
                 elif line.startswith("Average relative RF distance in this tree set:"):
-                    relative_rf_distance = line.split("in this tree set: ")[1]
+                    relative_rf_distance = line.split("in this tree set: ")[1].rstrip()
                 elif line.startswith("Number of unique topologies in this tree set:"):
-                    unique_topologies = line.split("in this tree set: ")[1]
+                    unique_topologies = line.split("in this tree set: ")[1].rstrip()
         with open(output.tsv) as o:
             o.write("\t".join(
                 [
