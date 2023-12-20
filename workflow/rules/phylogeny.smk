@@ -400,6 +400,7 @@ rule raxml_ng_rfdist_to_tsv:
                     "unique_topologies",
                 ]
             ))
+            o.write("\n")
             o.write("\t".join(
                 [
                     wildcards.inidividual,
