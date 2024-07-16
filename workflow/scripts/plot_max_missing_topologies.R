@@ -11,6 +11,7 @@ rfs_and_topos <- read_tsv(
     c(
       total_trees,
       unique_topologies,
+      convergence,
       relative_rf_distance,
       absolute_rf_distance
     ),
@@ -20,20 +21,21 @@ rfs_and_topos <- read_tsv(
   mutate(
     value_type = case_match(
       label,
-      c("total_trees", "unique_topologies") ~ "count",
-      "relative_rf_distance" ~ "relative distance",
-      "absolute_rf_distance" ~ "absolute distance"
+      c("total_trees", "unique_topologies", "convergence") ~ "count",
+      "relative_rf_distance" ~ "Robinson-Foulds distance, relative",
+      "absolute_rf_distance" ~ "Robinson-Foulds distance, absolute"
     ),
-    count_type = case_match(
+    `count of` = case_match(
       label,
-      "total_trees" ~ "number of trees",
-      "unique_topologies" ~ "number of topologies"
+      "total_trees" ~ "total trees",
+      "unique_topologies" ~ "distinct topologies",
+      "convergence" ~ "bootstrap trees for convergence"
     ),
-    tree_type = case_match(
+    `source of tree set` = case_match(
       tree_type,
-      "startTree" ~ "starting trees",
-      "mlTrees" ~ "maximum likelihood trees",
-      "bootstraps" ~ "bootstrap trees"
+      "startTree" ~ "start of maximum likelihood search",
+      "mlTrees" ~ "after maximum likelihood search",
+      "bootstraps" ~ "bootstrapping"
     )
   )
 
@@ -42,8 +44,8 @@ plot <- ggplot(
   aes(
     x = max_missing,
     y = value,
-    color = tree_type,
-    shape = count_type
+    color = `source of tree set`,
+    shape = `count of`
   )
 ) +
   scale_color_brewer(
