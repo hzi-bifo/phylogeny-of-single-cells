@@ -13,28 +13,41 @@ rfs_and_topos <- read_tsv(
       unique_topologies,
       convergence,
       relative_rf_distance,
-      absolute_rf_distance
+      absolute_rf_distance,
+      usable_sites
     ),
     names_to = "label",
     values_to = "value"
   ) |>
+  filter(
+    label != "relative_rf_distance"
+  ) |>
   mutate(
     value_type = case_match(
       label,
-      c("total_trees", "unique_topologies", "convergence") ~ "count",
-      "relative_rf_distance" ~ "Robinson-Foulds distance, relative",
-      "absolute_rf_distance" ~ "Robinson-Foulds distance, absolute"
+      "usable_sites" ~ "usable sites",
+      c("total_trees", "unique_topologies", "convergence") ~ "number of trees",
+#      "relative_rf_distance" ~ "Robinson-Foulds distance, relative",
+      "absolute_rf_distance" ~ "Robinson-Foulds distance"
     ),
-    `count of` = case_match(
+    value_type = factor(
+      value_type,
+      levels = c(
+        "usable sites",
+        "Robinson-Foulds distance",
+        "number of trees"
+      )
+    ),
+    `number of trees` = case_match(
       label,
-      "total_trees" ~ "total trees",
+      c("total_trees", "absolute_rf_distance", "usable_sites") ~ "total",
       "unique_topologies" ~ "distinct topologies",
-      "convergence" ~ "bootstrap trees for convergence"
+      "convergence" ~ "bootstrapping converges"
     ),
-    `source of tree set` = case_match(
+    `trees from` = case_match(
       tree_type,
-      "startTree" ~ "start of maximum likelihood search",
-      "mlTrees" ~ "after maximum likelihood search",
+      "startTree" ~ "start of ML search",
+      "mlTrees" ~ "result of ML search",
       "bootstraps" ~ "bootstrapping"
     )
   )
@@ -44,8 +57,8 @@ plot <- ggplot(
   aes(
     x = max_missing,
     y = value,
-    color = `source of tree set`,
-    shape = `count of`
+    color = `number of trees`,
+    shape = `trees from`
   )
 ) +
   scale_color_brewer(
@@ -57,9 +70,15 @@ plot <- ggplot(
     rows = vars(value_type),
     cols = vars(model),
     scales = "free_y"
-  )
+  ) +
+  ylim(0,NA)
+
+number_of_models <- rfs_and_topos |> distinct(model) |> count() |> pull(n)
+plot_width = 3 + number_of_models * 3.5
+
 
 ggsave(
   snakemake@output[["plot"]],
   plot = plot,
+  width = plot_width
 )
