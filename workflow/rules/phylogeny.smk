@@ -290,32 +290,6 @@ rule raxml_ng_bootstrap:
         "2>{log}"
 
 
-rule raxml_ng_bsconverge:
-    input:
-        bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
-        log="results/raxml_ng/{individual}/parse/{model}/max_{n_missing_cells}_missing/{individual}.raxml.log",
-    output:
-        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bsconverge.raxml.log",
-    log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bsconverge.raxml.error.log",
-    conda:
-        "../envs/raxml_ng.yaml"
-    params:
-        prefix=get_raxml_ng_prefix,
-#    threads: get_raxml_ng_threads
-    threads: 4
-    resources:
-        mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
-    shell:
-        "raxml-ng --bsconverge "
-        "  --bs-trees {input.bootstraps} "
-        "  --prefix {params.prefix} "
-        "  --threads auto{{{threads}}} "
-        "  --redo "
-        "2>{log}"
-
-
 rule raxml_ng_support:
     input:
         msa="results/raxml_ng/{individual}/input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.catg",
@@ -415,24 +389,121 @@ rule raxml_ng_rfdist_to_tsv:
             ))
 
 
-rule concatenate_rf_dist_results_per_individual:
+
+rule raxml_ng_bsconverge:
     input:
-        rf_dists=expand(
-            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.raxml.rf_dist.tsv",
+        bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
+        log="results/raxml_ng/{individual}/parse/{model}/max_{n_missing_cells}_missing/{individual}.raxml.log",
+    output:
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bsconverge.raxml.log",
+    log:
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bsconverge.raxml.error.log",
+    conda:
+        "../envs/raxml_ng.yaml"
+    params:
+        prefix=get_raxml_ng_prefix,
+#    threads: get_raxml_ng_threads
+    threads: 4
+    resources:
+        mem_mb=get_raxml_ng_mem_mb,
+        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
+    shell:
+        "raxml-ng --bsconverge "
+        "  --bs-trees {input.bootstraps} "
+        "  --prefix {params.prefix} "
+        "  --threads auto{{{threads}}} "
+        "  --redo "
+        "2>{log}"
+
+
+rule raxml_ng_bsconverge_to_tsv:
+    input:
+        bsconverge="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bsconverge.raxml.log",
+        ml_search="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log",
+    output:
+        tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bsconverge.tsv",
+    log:
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.bsconverge.raxml.log",
+    run:
+        with open(input.bsconverge) as f:
+            for line in f:
+                if line.startswith("Loaded "):
+                    total_trees = line.split("Loaded ")[1].split(" trees with ")[0]
+                elif line.startswith("Bootstopping test converged after "):
+                    convergence = line.split("Bootstopping test converged after ")[1].split(" trees")[0]
+                elif line.startswith("Bootstopping test did not converge after "):
+                    convergence = total_trees
+        with open(input.ml_search) as f:
+            for line in f:
+                if line.startswith("Alignment sites: "):
+                    usable_sites = line.split("Alignment sites: ")[1].rstrip()
+                    break
+        with open(output.tsv, mode="w") as o:
+            o.write("\t".join(
+                [
+                    "individual",
+                    "model",
+                    "max_missing",
+                    "usable_sites",
+                    "tree_type",
+                    "total_trees",
+                    "convergence",
+                ]
+            ))
+            o.write("\n")
+            o.write("\t".join(
+                [
+                    wildcards.individual,
+                    wildcards.model,
+                    wildcards.n_missing_cells,
+                    usable_sites,
+                    "bootstraps",
+                    total_trees,
+                    convergence,
+                ]
+            ))
+
+
+rule concatenate_raxml_ng_tsvs_per_individual_per_metric:
+    input:
+        rf_dists=lambda wc: expand(
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.raxml.{{metric}}.tsv",
             model=config["raxml_ng"]["models"],
             n_missing_cells=config["raxml_ng"]["max_missing"],
-            type=["startTree", "mlTrees", "bootstraps"],
+            type=["startTree", "mlTrees", "bootstraps"] if wc.metric == "rf_dist" else ["bootstraps"],
         ),
     output:
-        tsv="results/trees/{individual}.max_missing_stable_topology_selection.tsv",
+        tsv="results/trees/{individual}.{metric}.max_missing_stable_topology_selection.tsv",
     log:
-        "logs/trees/{individual}.max_missing_stable_topology_selection.log",
+        "logs/trees/{individual}.{metric}.max_missing_stable_topology_selection.log",
     conda:
         "../envs/xsv.yaml"
     shell:
         "( xsv cat rows "
         '    --delimiter "\\t" '
         "    {input.rf_dists} | "
+        "  xsv fmt --out-delimiter '\\t' "
+        "  >{output.tsv} "
+        ") 2>{log}"
+
+
+rule join_raxml_ng_tsvs_per_individual_across_metrics:
+    input:
+        bsconverge="results/trees/{individual}.bsconverge.max_missing_stable_topology_selection.tsv",
+        rf_dist="results/trees/{individual}.rf_dist.max_missing_stable_topology_selection.tsv",
+    output:
+        tsv="results/trees/{individual}.max_missing_stable_topology_selection.tsv",
+    log:
+        "logs/trees/{individual}.max_missing_stable_topology_selection.join_metrics.log",
+    conda:
+        "../envs/xsv.yaml"
+    shell:
+        "( xsv join "
+        '    --delimiter "\\t" '
+        "    --left "
+        "    individual,model,max_missing,tree_type,total_trees {input.rf_dist} "
+        "    individual,model,max_missing,tree_type,total_trees {input.bsconverge} | "
+        "  xsv select '!individual[1],model[1],max_missing[1],tree_type[1],total_trees[1]' | "
         "  xsv fmt --out-delimiter '\\t' "
         "  >{output.tsv} "
         ") 2>{log}"
