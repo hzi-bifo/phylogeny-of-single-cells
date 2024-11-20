@@ -75,6 +75,9 @@ def get_final_output():
             expand(
                 [
                     "results/trees/{ind}.max_missing_stable_topology_selection.pdf",
+                    "results/trees/{ind}.raxml.support_across_missingness.pdf",
+                    "results/trees/{ind}.raxml.support_vs_branch_length.full_data.pdf",
+                    "results/trees/{ind}.raxml.support_vs_branch_length.summary.pdf",
                     "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.raxml.support.pdf",
                 ],
                 ind=individual,

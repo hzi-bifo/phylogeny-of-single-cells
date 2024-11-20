@@ -536,6 +536,41 @@ rule plot_support_tree:
         "../scripts/plot_support_tree.R"
 
 
+rule plot_support_values_across_missingness:
+    input:
+        support_trees=expand(
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+            model=lookup("raxml_ng/models", within=config),
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config)
+        )
+    output:
+        support_plot="results/trees/{individual}.raxml.support_across_missingness.pdf",
+    log:
+        "logs/trees/{individual}.raxml.support_across_missingness_plot.log",
+    conda:
+        "../envs/ggtree.yaml"
+    script:
+        "../scripts/plot_bootstrap_support_values_across_missingness.R"
+
+
+rule plot_support_values_vs_branch_lengths:
+    input:
+        support_trees=expand(
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+            model=lookup("raxml_ng/models", within=config),
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config)
+        )
+    output:
+        data_plot="results/trees/{individual}.raxml.support_vs_branch_length.full_data.pdf",
+        summary_plot="results/trees/{individual}.raxml.support_vs_branch_length.summary.pdf",
+    log:
+        "logs/trees/{individual}.raxml.support_values_vs_branch_lengths.log",
+    conda:
+        "../envs/ggtree.yaml"
+    script:
+        "../scripts/plot_bootstrap_support_values_vs_branch_lengths.R"
+
+
 rule raxml_ng_ancestral:
     input:
         msa="results/raxml_ng/input/{individual}.ml_gt_and_likelihoods.catg",

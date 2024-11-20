@@ -5,3 +5,4 @@ channels:
 dependencies:
   - bioconductor-ggtree =3.8
   - r-tidyverse =2.0
+  - r-hexbin =1.28
