@@ -15,10 +15,6 @@ best_trees_support_vs_branch_length <- snakemake@input[["support_trees"]] |>
       node.label = "support"
     ) |>
     as_tibble() |>
-    drop_na(
-      branch.length,
-      support
-    ) |>
     add_column(
       max_missing = str_extract(
         filename,
@@ -41,15 +37,100 @@ best_trees_support_vs_branch_length <- snakemake@input[["support_trees"]] |>
   ) |>
   list_rbind()
 
+usable_sites <- read_tsv(
+    snakemake@input[["tsv"]]
+  ) |>
+  select(model, max_missing, usable_sites) |>
+  distinct()
+
+
 number_of_models <- best_trees_support_vs_branch_length |> distinct(model) |> count() |> pull(n)
 plot_height = number_of_models * 3
 plot_width = 2 + plot_height
 
+non_na_branch_lengths <- best_trees_support_vs_branch_length |>
+  drop_na(branch.length)
+
+branch_length_hist <- ggplot(
+    data = non_na_branch_lengths
+  ) +
+  geom_histogram(
+    aes(x = branch.length)
+  ) +
+  facet_grid(
+    cols=vars(model),
+    rows=vars(max_missing)
+  )
+
+ggsave(
+  filename = snakemake@output[["branch_length_hist"]],
+  plot = branch_length_hist,
+  width = plot_width,
+  height = plot_height * 0.75,
+  limitsize = FALSE
+)
+
+normalized_branch_lengths <- non_na_branch_lengths |>
+  left_join(
+    usable_sites,
+    by = join_by(
+      model,
+      max_missing
+    )
+  )
+
+branch_length_ecdf <- ggplot(
+    data = normalized_branch_lengths,
+    aes(
+      x = branch.length
+    )
+  ) +
+  stat_ecdf(geom = "point") +
+  facet_grid(
+    cols=vars(model),
+    rows=vars(max_missing)
+  )
+
+ggsave(
+  filename = snakemake@output[["branch_length_ecdf"]],
+  plot = branch_length_ecdf,
+  width = plot_width,
+  height = plot_height * 0.75,
+  limitsize = FALSE
+)
+
+
+
+support_hist <- ggplot(
+    data = best_trees_support_vs_branch_length |>
+      drop_na(support)
+  ) +
+  geom_histogram(
+    aes(x = support)
+  ) +
+  facet_grid(
+    cols=vars(model),
+    rows=vars(max_missing)
+  )
+
+ggsave(
+  filename = snakemake@output[["support_hist"]],
+  plot = support_hist,
+  width = plot_width,
+  height = plot_height * 0.75,
+  limitsize = FALSE
+)
+
+
 data_plot <- ggplot(
-    data = best_trees_support_vs_branch_length,
+    data = best_trees_support_vs_branch_length |>
+      drop_na(
+        branch.length,
+        support
+      ),
     mapping = aes(
-      x=branch.length,
-      y=support
+      x=support,
+      y=branch.length
     )
   ) +
   geom_hex(
@@ -81,7 +162,8 @@ ggsave(
   filename = snakemake@output[["data_plot"]],
   plot = data_plot,
   width = plot_width,
-  height = plot_height
+  height = plot_height,
+  limitsize = FALSE
 )
 
 
@@ -102,25 +184,25 @@ best_trees_2d_summary <- best_trees_support_vs_branch_length |>
 
 summary_plot <- ggplot(
    data = best_trees_2d_summary,
-    mapping = aes(
-      x=branch_length_summary_y,
-      y=support_summary_y
+   mapping = aes(
+      x=support_summary_y,
+      y=branch_length_summary_y
     )
   ) +
   geom_point(
      color="red"
   ) +
-  geom_errorbarh(
+  geom_errorbar(
     mapping = aes(
-      xmin=branch_length_summary_ymin,
-      xmax=branch_length_summary_ymax
+      ymin=branch_length_summary_ymin,
+      ymax=branch_length_summary_ymax
     ),
     color="red"
   ) +
-  geom_errorbar(
+  geom_errorbarh(
     mapping = aes(
-      ymin=support_summary_ymin,
-      ymax=support_summary_ymax
+      xmin=support_summary_ymin,
+      xmax=support_summary_ymax
     ),
     color="red"
   ) +
@@ -144,5 +226,6 @@ ggsave(
   filename = snakemake@output[["summary_plot"]],
   plot = summary_plot,
   width = plot_width,
-  height = plot_height
+  height = plot_height,
+  limitsize = FALSE
 )

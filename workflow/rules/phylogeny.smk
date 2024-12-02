@@ -437,6 +437,9 @@ rule raxml_ng_bsconverge_to_tsv:
             for line in f:
                 if line.startswith("Alignment sites: "):
                     usable_sites = line.split("Alignment sites: ")[1].rstrip()
+                elif line.startswith("AIC score: "):
+                    scores = line.rstrip().split(" / ")
+                    [ aic, aicc, bic ] = [ s.split(" score: ")[1] for s in scores]
                     break
         with open(output.tsv, mode="w") as o:
             o.write("\t".join(
@@ -448,6 +451,9 @@ rule raxml_ng_bsconverge_to_tsv:
                     "tree_type",
                     "total_trees",
                     "convergence",
+                    "aic_score",
+                    "aicc_score",
+                    "bic_score",
                 ]
             ))
             o.write("\n")
@@ -460,6 +466,9 @@ rule raxml_ng_bsconverge_to_tsv:
                     "bootstraps",
                     total_trees,
                     convergence,
+                    aic,
+                    aicc,
+                    bic,
                 ]
             ))
 
@@ -553,14 +562,22 @@ rule plot_support_values_across_missingness:
         "../scripts/plot_bootstrap_support_values_across_missingness.R"
 
 
-rule plot_support_values_vs_branch_lengths:
+rule plot_support_values_and_branch_lengths:
     input:
         support_trees=expand(
             "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
             model=lookup("raxml_ng/models", within=config),
-            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config)
-        )
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
+        ),
+        tsv=expand(
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bsconverge.tsv",
+            model=lookup("raxml_ng/models", within=config),
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
+        ),
     output:
+        support_hist="results/trees/{individual}.raxml.support.histogram.pdf",
+        branch_length_hist="results/trees/{individual}.raxml.branch_length.histogram.pdf",
+        branch_length_ecdf="results/trees/{individual}.raxml.branch_length.ecdf.pdf",
         data_plot="results/trees/{individual}.raxml.support_vs_branch_length.full_data.pdf",
         summary_plot="results/trees/{individual}.raxml.support_vs_branch_length.summary.pdf",
     log:

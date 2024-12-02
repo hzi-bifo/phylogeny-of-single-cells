@@ -14,7 +14,10 @@ rfs_and_topos <- read_tsv(
       convergence,
       relative_rf_distance,
       absolute_rf_distance,
-      usable_sites
+      usable_sites,
+      aic_score,
+      aicc_score,
+      bic_score
     ),
     names_to = "label",
     values_to = "value"
@@ -26,6 +29,7 @@ rfs_and_topos <- read_tsv(
     value_type = case_match(
       label,
       "usable_sites" ~ "usable sites",
+      c("aic_score", "aicc_score", "bic_score") ~ "information criteria scores",
       c("total_trees", "unique_topologies", "convergence") ~ "number of trees",
 #      "relative_rf_distance" ~ "Robinson-Foulds distance, relative",
       "absolute_rf_distance" ~ "Robinson-Foulds distance"
@@ -34,13 +38,21 @@ rfs_and_topos <- read_tsv(
       value_type,
       levels = c(
         "usable sites",
+        "information criteria scores",
         "Robinson-Foulds distance",
         "number of trees"
       )
     ),
     `number of trees` = case_match(
       label,
-      c("total_trees", "absolute_rf_distance", "usable_sites") ~ "total",
+      c(
+        "total_trees",
+        "absolute_rf_distance",
+        "usable_sites",
+        "aic_score",
+        "aicc_score",
+        "bic_score"
+      ) ~ "total",
       "unique_topologies" ~ "distinct topologies",
       "convergence" ~ "bootstrapping converges"
     ),
@@ -49,6 +61,22 @@ rfs_and_topos <- read_tsv(
       "startTree" ~ "start of ML search",
       "mlTrees" ~ "result of ML search",
       "bootstraps" ~ "bootstrapping"
+    ),
+    `information criteria scores` = case_match(
+      label,
+      "aic_score" ~ "Akaike",
+      "aicc_score" ~ "Akaike corrected",
+      "bic_score" ~ "Bayesian",
+      .default = "non-score lines"
+    ),
+    `information criteria scores` = factor(
+      `information criteria scores`,
+      levels = c(
+        "non-score lines",
+      "bic_score" ~ "Bayesian",
+      "aicc_score" ~ "Akaike corrected",
+      "aic_score" ~ "Akaike"
+      )
     )
   )
 
@@ -58,7 +86,8 @@ plot <- ggplot(
     x = max_missing,
     y = value,
     color = `number of trees`,
-    shape = `trees from`
+    shape = `trees from`,
+    linetype = `information criteria scores`
   )
 ) +
   scale_color_brewer(
@@ -80,5 +109,6 @@ plot_width = 3 + number_of_models * 3.5
 ggsave(
   snakemake@output[["plot"]],
   plot = plot,
-  width = plot_width
+  width = plot_width,
+  limitsize = FALSE
 )
