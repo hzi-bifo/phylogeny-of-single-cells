@@ -48,5 +48,6 @@ plot_width = 2 + number_of_models * 5
 ggsave(
   filename = snakemake@output[["support_plot"]],
   plot = support_across_missingness,
-  width = plot_width
+  width = plot_width,
+  limitsize = FALSE
 )
