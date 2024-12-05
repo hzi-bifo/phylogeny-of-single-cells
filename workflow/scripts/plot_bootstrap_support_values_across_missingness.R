@@ -33,14 +33,29 @@ best_trees_support_values <- snakemake@input[["support_trees"]] |>
 
 support_across_missingness <- ggplot(
     best_trees_support_values,
-    aes(x=factor(max_missing), y=support)
+    aes(
+      x=model, 
+      y=support
+    )
   ) + 
   geom_violin() +
   geom_jitter(width=0.25) +
   stat_summary(color="red") +
   facet_grid(
-    cols = vars(model)
+    cols = vars(factor(max_missing))
+  ) +
+  theme_bw() +
+  theme(
+    # text = element_text(size=rel(5.5)),
+    # x-axis facet labels do not seem to inherit from text above
+    # strip.text.x = element_text(size=rel(5.5)),
+    axis.text.x = element_text(
+      angle=45,
+      vjust=0.9,
+      hjust=0.9
+    )
   )
+
 
 number_of_models <- best_trees_support_values |> distinct(model) |> count() |> pull(n)
 plot_width = 2 + number_of_models * 5
