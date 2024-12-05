@@ -62,6 +62,8 @@ wildcard_constraints:
     sc="|".join(samples["sample_name"]),
     genotype="|".join(["hom_ref", "het", "hom_alt"]),
     ref_alt="[ACGT]_[ACGT]",
+    metric="|".join(["bsconverge", "rf_dist"]),
+    software="|".join(["raxml_ng", "gotree"]),
 
 
 #### compile wanted workflow outputs
@@ -74,13 +76,14 @@ def get_final_output():
         final_output.extend(
             expand(
                 [
-                    "results/trees/{ind}.max_missing_stable_topology_selection.pdf",
-                    "results/trees/{ind}.raxml.support_across_missingness.pdf",
-                    "results/trees/{ind}.raxml.support_vs_branch_length.full_data.pdf",
-                    "results/trees/{ind}.raxml.support_vs_branch_length.summary.pdf",
-                    "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.raxml.support.pdf",
+                    "results/trees/{ind}.{software}.max_missing_stable_topology_selection.pdf",
+                    "results/trees/{ind}.{software}.support_across_missingness.pdf",
+                    "results/trees/{ind}.{software}.support_vs_branch_length.full_data.pdf",
+                    "results/trees/{ind}.{software}.support_vs_branch_length.summary.pdf",
+                    "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.{software}.support.pdf",
                 ],
                 ind=individual,
+                software=["raxml_ng", "gotree"],
                 model=config["raxml_ng"]["models"],
                 max_missing=config["raxml_ng"]["max_missing"],
             )
