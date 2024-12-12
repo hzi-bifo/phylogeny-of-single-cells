@@ -27,22 +27,47 @@ best_trees_support_values <- snakemake@input[["support_trees"]] |>
         group = 1
       )
     ) |>
-    mutate(max_missing = as.integer(max_missing)) |>
-    select(support, max_missing, model)) |>
-    list_rbind()
+  mutate(max_missing = as.integer(max_missing)) |>
+  select(support, max_missing, model)) |>
+  list_rbind() |>
+  add_column(
+    value_type = "bootstrap support"
+  ) |>
+  rename(
+    value = support
+  )
+  
+cluster_info_dist <- read_tsv(snakemake@input[["cluster_info_dist"]]) |>
+  mutate(
+    tree_type = str_c(tree_type, " cluster info dist")
+  ) |>
+  rename(
+    value = cluster_information_distance,
+    value_type = tree_type
+  )
+
+all_values <- bind_rows(
+    best_trees_support_values,
+    cluster_info_dist
+  )
 
 support_across_missingness <- ggplot(
-    best_trees_support_values,
+    all_values,
     aes(
       x=model, 
-      y=support
+      y=value
     )
   ) + 
-  geom_violin() +
-  geom_jitter(width=0.25) +
-  stat_summary(color="red") +
+  geom_violin(
+    draw_quantiles = c(0.25, 0.5, 0.75)
+  ) +
+  stat_summary(
+    fun.data="mean_se",
+    color="red"
+  ) +
   facet_grid(
-    cols = vars(factor(max_missing))
+    cols = vars(factor(max_missing)),
+    rows = vars(factor(value_type))
   ) +
   theme_bw() +
   theme(
@@ -64,5 +89,6 @@ ggsave(
   filename = snakemake@output[["support_plot"]],
   plot = support_across_missingness,
   width = plot_width,
+  height = 4 * 5 + 1,
   limitsize = FALSE
 )

@@ -371,6 +371,23 @@ rule gotree_support_collapsed_trees:
         ") 2>{log}"
 
 
+rule cluster_info_dist_across_trees:
+    input:
+        trees=lambda wc: expand(
+            "results/{{software}}/{{individual}}/results/{{model}}/max_{{n_missing_cells}}_missing/{{individual}}.{{model}}.max_{{n_missing_cells}}_missing.{infix}.raxml.{{type}}",
+            infix="bootstraps" if wc.type == "bootstraps" else "search",
+        ),
+    output:
+        cluster_info_dist="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.tsv",
+    log:
+        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.log",
+    conda:
+        "../envs/treedist.yaml"
+    threads: 1
+    script:
+        "../scripts/cluster_info_dist.R"
+
+
 rule raxml_ng_rfdist_across_trees:
     input:
         trees=lambda wc: expand(
@@ -597,21 +614,29 @@ rule plot_support_tree:
         "../scripts/plot_support_tree.R"
 
 
-rule plot_support_values_across_missingness:
+rule plot_values_across_missingness:
     input:
         support_trees=expand(
             "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
             model=lookup("raxml_ng/models", within=config),
-            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config)
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
+        ),
+        cluster_info_dist=expand(
+            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.tsv",
+            model=lookup("raxml_ng/models", within=config),
+            n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
+            type=["startTree", "mlTrees", "bootstraps"],
         )
     output:
-        support_plot="results/trees/{individual}.{software}.support_across_missingness.pdf",
+        support_plot="results/trees/{individual}.{software}.tree_values_across_missingness.pdf",
     log:
-        "logs/trees/{individual}.{software}.support_across_missingness_plot.log",
+        "logs/trees/{individual}.{software}.tree_values_across_missingness_plot.log",
     conda:
         "../envs/ggtree.yaml"
+    resources:
+        mem_mb=lambda wc, input: input.size_mb * 1.2
     script:
-        "../scripts/plot_bootstrap_support_values_across_missingness.R"
+        "../scripts/plot_tree_values_across_missingness.R"
 
 
 rule plot_support_values_and_branch_lengths:

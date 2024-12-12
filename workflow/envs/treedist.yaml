@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - r-treedist =2.9
+  - r-tidyverse =2.0
