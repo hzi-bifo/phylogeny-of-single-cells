@@ -290,16 +290,29 @@ rule raxml_ng_bootstrap:
         "2>{log}"
 
 
+rule gotree_consensus_ml_tree:
+    input:
+        ml_trees="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.mlTrees",
+    output:
+        consensus_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree",
+    log:
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree.log",
+    conda:
+        "../envs/gotree.yaml"
+    shell:
+        "gotree compute consensus -i {input.ml_trees} --freq-min 0.5 -o {output.consensus_tree} 2>{log}"
+
+
 rule raxml_ng_support:
     input:
         log="results/raxml_ng/{individual}/parse/{model}/max_{n_missing_cells}_missing/{individual}.raxml.log",
-        best_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.bestTree",
+        best_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
         bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
     output:
-        bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
-        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.log",
+        support="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.log",
     log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.error.log",
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.error.log",
     conda:
         "../envs/raxml_ng.yaml"
     params:
@@ -351,14 +364,15 @@ rule gotree_collapse_tree:
         "gotree collapse length --length {params.min_length} --input {input.best_tree} --output {output.collapsed} 2>{log} "
 
 
+
 rule gotree_support_collapsed_trees:
     input:
-        best_tree="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.bestTree",
+        best_tree="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
         bootstraps="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
     output:
-        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
     log:
-        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.support.log",
+        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support.log",
     conda:
         "../envs/gotree.yaml"
     threads: 4
@@ -602,12 +616,12 @@ rule plot_distinct_topologies_across_missingness:
 
 rule plot_support_tree:
     input:
-        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
         samples=config["samples"],
     output:
-        support="results/trees/{individual}/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{software}.support.pdf",
+        support="results/trees/{individual}/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{software}.support.{tree_type}.pdf",
     log:
-        "logs/trees/{model}/max_{n_missing_cells}_missing/{individual}.{software}.support.log",
+        "logs/trees/{model}/max_{n_missing_cells}_missing/{individual}.{software}.support.{tree_type}.log",
     conda:
         "../envs/ggtree.yaml"
     script:
@@ -617,9 +631,10 @@ rule plot_support_tree:
 rule plot_values_across_missingness:
     input:
         support_trees=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
+            tree_type=["bestTree", "consensusTree"]
         ),
         cluster_info_dist=expand(
             "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.tsv",
@@ -647,7 +662,7 @@ rule plot_support_values_and_branch_lengths:
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
         ),
         tsv=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bsconverge.tsv",
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bsconverge.tsv",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
         ),

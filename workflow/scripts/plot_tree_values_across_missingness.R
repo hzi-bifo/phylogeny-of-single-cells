@@ -25,16 +25,22 @@ best_trees_support_values <- snakemake@input[["support_trees"]] |>
         filename,
         "results/([^/]+)/max_",
         group = 1
+      ),
+      tree_type = str_extract(
+        filename,
+        "raxml\\.([^.]+)\\.support$",
+        group = 1
       )
     ) |>
   mutate(max_missing = as.integer(max_missing)) |>
-  select(support, max_missing, model)) |>
+  select(support, tree_type, max_missing, model)) |>
   list_rbind() |>
-  add_column(
-    value_type = "bootstrap support"
+  mutate(
+    tree_type = str_c(tree_type, " bootstrap support")
   ) |>
   rename(
-    value = support
+    value = support,
+    value_type = tree_type
   )
   
 cluster_info_dist <- read_tsv(snakemake@input[["cluster_info_dist"]]) |>
