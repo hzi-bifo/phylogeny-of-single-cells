@@ -303,35 +303,6 @@ rule gotree_consensus_ml_tree:
         "gotree compute consensus -i {input.ml_trees} --freq-min 0.5 -o {output.consensus_tree} 2>{log}"
 
 
-rule raxml_ng_support:
-    input:
-        log="results/raxml_ng/{individual}/parse/{model}/max_{n_missing_cells}_missing/{individual}.raxml.log",
-        best_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
-        bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
-    output:
-        support="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
-        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.log",
-    log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.error.log",
-    conda:
-        "../envs/raxml_ng.yaml"
-    params:
-        prefix=get_raxml_ng_prefix,
-#    threads: get_raxml_ng_threads
-    threads: 4
-    resources:
-        mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
-    shell:
-        "raxml-ng --support "
-        "  --tree {input.best_tree} "
-        "  --bs-trees {input.bootstraps} "
-        "  --prefix {params.prefix} "
-        "  --bs-metric tbe "
-        "  --redo "
-        "2>{log}"
-
-
 rule gotree_collapse_bootstrap_trees:
     input:
         bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
@@ -364,15 +335,14 @@ rule gotree_collapse_tree:
         "gotree collapse length --length {params.min_length} --input {input.best_tree} --output {output.collapsed} 2>{log} "
 
 
-
 rule gotree_support_collapsed_trees:
     input:
-        best_tree="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
-        bootstraps="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
+        ref_tree="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
+        bootstraps="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
     output:
-        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
+        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
     log:
-        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support.log",
+        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support.log",
     conda:
         "../envs/gotree.yaml"
     threads: 4
@@ -380,7 +350,7 @@ rule gotree_support_collapsed_trees:
         "( gotree compute support tbe "
         "    --threads {threads} "
         "    --bootstrap {input.bootstraps} "
-        "    --reftree {input.best_tree} "
+        "    --reftree {input.ref_tree} "
         "    --out {output.support} "
         ") 2>{log}"
 
@@ -616,7 +586,7 @@ rule plot_distinct_topologies_across_missingness:
 
 rule plot_support_tree:
     input:
-        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
+        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
         samples=config["samples"],
     output:
         support="results/trees/{individual}/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{software}.support.{tree_type}.pdf",
