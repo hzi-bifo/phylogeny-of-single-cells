@@ -355,14 +355,38 @@ rule gotree_support_collapsed_trees:
         ") 2>{log}"
 
 
+rule extract_ml_tree_likelihoods:
+    input:
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log",
+    output:
+        tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.tsv",
+    log:
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.log",
+    conda:
+        "../envs/grep.yaml"
+    shell:
+        'grep "ML tree search #" {input.log} | '
+        "sed -e 's/^.*ML tree search #\([0-9]\+\), logLikelihood: \(-[0-9]\+\.[0-9]\+\)/\1\t\2/' | "
+        "sort -n -k 1,1 "
+        ">control.GTHKY4+G+FO.max_4_missing.search.raxml.mlTrees.likelihoods.tsv "
+        "2>{log}"
+
+
 rule cluster_info_dist_across_trees:
     input:
         trees=lambda wc: expand(
             "results/{{software}}/{{individual}}/results/{{model}}/max_{{n_missing_cells}}_missing/{{individual}}.{{model}}.max_{{n_missing_cells}}_missing.{infix}.raxml.{{type}}",
             infix="bootstraps" if wc.type == "bootstraps" else "search",
         ),
+        likelihoods="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.tsv",
     output:
-        cluster_info_dist="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.tsv",
+        all_cid="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv",
+        silhouette_scores="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.clustering_silhouette_scores.pdf",
+        best_clustering_log_likelihoods="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_log_likelihoods.pdf",
+        best_clustering_silhouette_scores="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_silhouette_scores.pdf",
+        mapping_cluster_likelihood="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_pcoa_mapping_with_tree_likelihoods.pdf",
+        best_cluster_cid="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.best_cluster.best_cluster_info_dist.tsv",
+        best_cluster_trees="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.best_cluster.best_cluster_trees.newick",
     log:
         "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.log",
     conda:
