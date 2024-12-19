@@ -3,3 +3,5 @@ channels:
   - nodefaults
 dependencies:
   - grep =3.11
+  - sed =4.8
+  - coreutils =9.5
