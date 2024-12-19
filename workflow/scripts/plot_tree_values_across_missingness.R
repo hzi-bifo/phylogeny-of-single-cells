@@ -28,7 +28,7 @@ best_trees_support_values <- snakemake@input[["support_trees"]] |>
       ),
       tree_type = str_extract(
         filename,
-        "raxml\\.([^.]+)\\.support$",
+        "support\\.([^.]+)\\.raxml\\.support$",
         group = 1
       )
     ) |>
