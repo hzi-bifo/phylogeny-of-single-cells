@@ -631,7 +631,7 @@ rule plot_values_across_missingness:
             tree_type=["bestTree", "consensusTree"]
         ),
         cluster_info_dist=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.cluster_info_dist.tsv",
+            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
             type=["startTree", "mlTrees", "bootstraps"],
