@@ -365,11 +365,11 @@ rule extract_ml_tree_likelihoods:
     conda:
         "../envs/grep.yaml"
     shell:
-        'grep "ML tree search #" {input.log} | '
+        '( grep "ML tree search #" {input.log} | '
         r"sed -r -e 's/^.*ML tree search #([0-9]+), logLikelihood: (-[0-9]+.[0-9]+)$/\1\t\2/' | "
         "sort -n -k 1,1 "
-        ">control.GTHKY4+G+FO.max_4_missing.search.raxml.mlTrees.likelihoods.tsv "
-        "2>{log}"
+        ">{output.tsv} "
+        ") 2>{log}"
 
 
 rule cluster_info_dist_across_trees:
