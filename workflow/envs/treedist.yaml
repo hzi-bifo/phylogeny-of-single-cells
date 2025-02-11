@@ -5,3 +5,4 @@ dependencies:
   - r-treedist =2.9
   - r-tidyverse =2.0
   - r-cluster =2.1
+  - r-protoclust =1.6
