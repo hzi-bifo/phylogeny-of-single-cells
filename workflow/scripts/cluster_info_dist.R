@@ -35,13 +35,13 @@ write_tsv(
 
 number_of_clusters <- as_tibble_col(2:20, column_name = "number_of_clusters")
 
-hierarchical_clustering_tree <- protoclust(distances)
+hierarchical_clustering_tree <- protoclust::protoclust(all_trees_cid)
 
 clusterings <- number_of_clusters |> 
   mutate(
     clustering_partitioning_around_medoids = map(
       number_of_clusters,
-      \(x) cluster::pam(!!distances, x)
+      \(x) cluster::pam(!!all_trees_cid, x)
     ),
     clustering_hierarchical = map(
       number_of_clusters,
@@ -49,7 +49,7 @@ clusterings <- number_of_clusters |>
     ),
     clustering_k_means = map(
       number_of_clusters, 
-      \(x) KMeansPP(!!distances, k = x)
+      \(x) KMeansPP(!!all_trees_cid, k = x)
     )
   ) |>
   pivot_longer(
@@ -75,7 +75,7 @@ clusterings <- number_of_clusters |>
     mean_silhouette = map(
       clustering,
       \(x)
-        mean(cluster::silhouette(x, !!distances)[, "sil_width"])
+        mean(cluster::silhouette(x, !!all_trees_cid)[, "sil_width"])
     ) 
   ) |>
   unnest(mean_silhouette)
