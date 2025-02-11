@@ -109,6 +109,10 @@ best_clustering_tidy <- best_clustering |>
     cluster = factor(cluster)
   )
 
+total_trees <- best_clustering_tidy |>
+  summarise(n = n()) |>
+  pull()
+
 # select best cluster from best clustering
 
 tree_log_likelihoods <- left_join(
@@ -117,15 +121,75 @@ tree_log_likelihoods <- left_join(
     by = "tree"
   )
 
+cluster_likelihoods <- tree_log_likelihoods |>
+  group_by(cluster) |>
+  summarise(
+    n = n(),
+    mean = mean(log_likelihood),
+    max = max(log_likelihood),
+    median = num(median(as.numeric(log_likelihood)), digits=6)
+  )
+
+best_cluster <- cluster_likelihoods |>
+  # ignore very small clusters, assuming they are not well supported
+  filter(n > .02 * total_trees) |>
+  slice_max(mean) |>
+  pull(cluster)
+
+best_cluster_tree_numbers <- best_clustering_tidy |>
+  filter(cluster == best_cluster) |>
+  pull(tree)
+
+best_cluster_trees <- trees[best_cluster_tree_numbers]
+
+ape::write.tree(
+  best_cluster_trees,
+  snakemake@output[["best_cluster_trees"]]
+)
+
+best_cluster_trees_cids <- all_trees_cid[best_cluster_tree_numbers, best_cluster_tree_numbers]
+
+best_cluster_trees_cids_dedup <- best_cluster_trees_cids[lower.tri(best_cluster_trees_cids)]
+
+best_cluster_cid <- best_cluster_trees_cids_dedup |>
+  as_tibble_col(column_name = "cluster_information_distance") |>
+  add_column(
+    model=snakemake@wildcards[["model"]],
+    max_missing=snakemake@wildcards[["n_missing_cells"]],
+    tree_type=snakemake@wildcards[["type"]],
+    software=snakemake@wildcards[["software"]]
+  )
+
+write_tsv(
+  x = best_cluster_cid,
+  file = snakemake@output[["best_cluster_cid"]]
+)
+
+save.image(file = "debug_cid_setNames.RData")
+
 cluster_log_likelihoods_plot <- ggplot(
     tree_log_likelihoods,
     aes(
       x=cluster,
-      y=log_likelihood
+      y=log_likelihood,
+      color=cluster
     )
   ) +
-  geom_violin() +
+  geom_violin(
+    draw_quantiles = c(0.25, 0.5, 0.75)
+  ) +
   geom_jitter() +
+  scale_color_manual(
+    str_wrap(
+      "cluster with highest mean log likelihood",
+      width = 12
+    ),
+    values = setNames("blue", best_cluster)
+  ) +
+  stat_summary(
+    fun.data="mean_se",
+    color="red"
+  ) +
   theme_bw()
 
 ggsave(
@@ -135,32 +199,51 @@ ggsave(
   height = 8
 )
 
-best_clustering_silhouette_scores <- cluster::silhouette(best_clustering, distances)[, "sil_width"] |>
+best_clustering_silhouette_scores <- cluster::silhouette(best_clustering, all_trees_cid)[, "sil_width"] |>
   enframe(name = "tree", value = "sil_width") |>
   left_join(
     tree_log_likelihoods,
     by = "tree"
   )
 
+write_tsv(
+  x = best_clustering_silhouette_scores,
+  file = snakemake@output[["best_clustering_silhouette_ll"]]
+)
+
 cluster_silhouette_scores_plot <- ggplot(
     best_clustering_silhouette_scores,
     aes(
       x=cluster,
-      y=sil_width
+      y=sil_width,
+      color=cluster
     )
   ) +
-  geom_violin() +
+  geom_violin(
+    draw_quantiles = c(0.25, 0.5, 0.75)
+  ) +
   geom_jitter() +
+  scale_color_manual(
+    str_wrap(
+      "cluster with highest mean log likelihood",
+      width = 12
+    ),
+    values = setNames("blue", best_cluster)
+  ) +
+  stat_summary(
+    fun.data="mean_se",
+    color="red"
+  ) +
   theme_bw()
 
 ggsave(
   snakemake@output[["best_clustering_silhouette_scores"]],
-  cluster_log_likelihoods_plot,
+  cluster_silhouette_scores_plot,
   width = max(best_clustering) * 1.2,
   height = 8
 )
 
-pcoa_tidy <- cmdscale(distances, k = 8) |>
+pcoa_tidy <- cmdscale(all_trees_cid, k = 8) |>
   as_tibble() |>
   rownames_to_column("tree") |>
   pivot_longer(
@@ -192,6 +275,12 @@ cluster_stats <- best_clustering_silhouette_scores |>
     cluster = factor(cluster)
   )
 
+write_tsv(
+  x = cluster_stats,
+  file = snakemake@output[["best_clustering_stats"]]
+)
+
+
 all_annotated <- all_combinations |>
   left_join(
     tree_log_likelihoods,
@@ -201,10 +290,6 @@ all_annotated <- all_combinations |>
     cluster_stats,
     by="cluster"
   )
-
-total_trees <- cluster_stats |>
-  summarise(total = sum(n)) |>
-  pull()
 
 mapping_plot_cluster_and_log_likelihood <- ggplot(
     all_annotated |>
@@ -234,31 +319,5 @@ ggsave(
   mapping_plot_cluster_and_log_likelihood,
   width = 8 * 3 + 2,
   height = 8 * 2.5 + 1
-)
-
-cluster_likelihoods <- tree_log_likelihoods |>
-  group_by(cluster) |>
-  summarise(
-    n = n(),
-    mean = mean(log_likelihood),
-    max = max(log_likelihood),
-    median = num(median(as.numeric(log_likelihood)), digits=6)
-  )
-
-best_cluster <- cluster_likelihoods |>
-  # ignore very small clusters, assuming they are not well supported
-  filter(n > .02 * total_trees) |>
-  slice_max(mean) |>
-  pull(cluster)
-
-best_cluster_trees <- trees[
-    best_clustering |>
-    filter(cluster == best_cluster) |>
-    pull(tree)
-  ]
-
-ape::write.tree(
-  best_cluster_trees,
-  snakemake@output[["best_cluster_trees"]]
 )
 

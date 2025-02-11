@@ -375,15 +375,20 @@ rule extract_ml_tree_likelihoods:
 rule cluster_info_dist_across_trees:
     input:
         trees=lambda wc: expand(
-            "results/{{software}}/{{individual}}/results/{{model}}/max_{{n_missing_cells}}_missing/{{individual}}.{{model}}.max_{{n_missing_cells}}_missing.{infix}.raxml.{{type}}",
+            "results/{{software}}/{{individual}}/results/{{model}}/max_{{n_missing_cells}}_missing/{{individual}}.{{model}}.max_{{n_missing_cells}}_missing.{infix}.raxml.collapsed.{{type}}",
             infix="bootstraps" if wc.type == "bootstraps" else "search",
         ),
-        likelihoods="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.tsv",
+        likelihoods=lambda wc: expand(
+            "results/raxml_ng/{{individual}}/results/{{model}}/max_{{n_missing_cells}}_missing/{{individual}}.{{model}}.max_{{n_missing_cells}}_missing.{infix}.raxml.log_likelihoods.tsv",
+            infix="bootstraps" if wc.type == "bootstraps" else "search",
+        )
     output:
-        all_cid="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv",
+        all_cid="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv.gz",
         silhouette_scores="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.clustering_silhouette_scores.pdf",
         best_clustering_log_likelihoods="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_log_likelihoods.pdf",
         best_clustering_silhouette_scores="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_silhouette_scores.pdf",
+        best_clustering_silhouette_ll="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering.silhouette_scores_log_likelihoods.tsv",
+        best_clustering_stats="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering.stats.tsv",
         mapping_cluster_likelihood="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.all.best_clustering_pcoa_mapping_with_tree_likelihoods.pdf",
         best_cluster_cid="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.best_cluster.best_cluster_info_dist.tsv",
         best_cluster_trees="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{type}.best_cluster.best_cluster_trees.newick",
