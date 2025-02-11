@@ -488,7 +488,7 @@ rule raxml_ng_bsconverge:
     threads: 4
     resources:
         mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
+        runtime=lambda wildcards, attempt: attempt * 60 * 22,
     shell:
         "raxml-ng --bsconverge "
         "  --bs-trees {input.bootstraps} "
