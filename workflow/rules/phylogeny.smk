@@ -274,7 +274,7 @@ rule raxml_ng_bootstrap:
     threads: 32
     resources:
         mem_mb=get_raxml_ng_mem_mb,
-        runtime=lambda wildcards, attempt: attempt * 60 * 24 * 3,
+        runtime=lambda wildcards, attempt: attempt * 60 * 22,
     shell:
         "raxml-ng --bootstrap "
         "  --msa {input.msa} "
