@@ -6,6 +6,7 @@ sink(log, type="message")
 library("TreeDist")
 library("tidyverse")
 library("cluster")
+library("protoclust")
 
 # cluster information distance of all input trees
 
