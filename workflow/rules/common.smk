@@ -76,14 +76,13 @@ def get_final_output():
         final_output.extend(
             expand(
                 [
-                    "results/trees/{ind}.raxml_ng.max_missing_stable_topology_selection.pdf",
-                    "results/trees/{ind}.{software}.tree_values_across_missingness.pdf",
-                    "results/trees/{ind}.{software}.support_vs_branch_length.full_data.pdf",
-                    "results/trees/{ind}.{software}.support_vs_branch_length.summary.pdf",
-                    "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.{software}.support.{tree_type}.pdf",
+                    "results/trees/{ind}.max_missing_stable_topology_selection.pdf",
+                    "results/trees/{ind}.tree_values_across_missingness.pdf",
+                    "results/trees/{ind}.{tree_type}.support_vs_branch_length.full_data.pdf",
+                    "results/trees/{ind}.{tree_type}.support_vs_branch_length.summary.pdf",
+                    "results/trees/{ind}/{model}/max_{max_missing}_missing/{ind}.{model}.max_{max_missing}_missing.support.{tree_type}.collapsed.pdf",
                 ],
                 ind=individual,
-                software=["raxml_ng", "gotree"],
                 model=config["raxml_ng"]["models"],
                 max_missing=config["raxml_ng"]["max_missing"],
                 tree_type=["bestTree", "consensusTree"],

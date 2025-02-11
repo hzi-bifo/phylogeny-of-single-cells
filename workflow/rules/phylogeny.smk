@@ -290,27 +290,14 @@ rule raxml_ng_bootstrap:
         "2>{log}"
 
 
-rule gotree_consensus_ml_tree:
-    input:
-        ml_trees="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.mlTrees",
-    output:
-        consensus_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree",
-    log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree.log",
-    conda:
-        "../envs/gotree.yaml"
-    shell:
-        "gotree compute consensus -i {input.ml_trees} --freq-min 0.5 -o {output.consensus_tree} 2>{log}"
-
-
 rule gotree_collapse_bootstrap_trees:
     input:
         bootstraps="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
         variant_sites="results/raxml_ng/{individual}/input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
     output:
-        collapsed="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
+        collapsed="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.collapsed.bootstraps",
     log:
-        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps.log",
+        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.collapsed.bootstraps.log",
     conda:
         "../envs/gotree.yaml"
     params:
@@ -321,12 +308,12 @@ rule gotree_collapse_bootstrap_trees:
 
 rule gotree_collapse_tree:
     input:
-        best_tree="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{type}",
+        best_tree="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{type}",
         variant_sites="results/raxml_ng/{individual}/input/max_{n_missing_cells}_missing/{individual}.ml_gt_and_likelihoods.filtered_sites.txt",
     output:
-        collapsed="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{type}",
+        collapsed="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.collapsed.{type}",
     log:
-        "logs/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{type}.log",
+        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.collapsed.{type}.log",
     conda:
         "../envs/gotree.yaml"
     params:
@@ -335,38 +322,20 @@ rule gotree_collapse_tree:
         "gotree collapse length --length {params.min_length} --input {input.best_tree} --output {output.collapsed} 2>{log} "
 
 
-rule gotree_support_collapsed_trees:
-    input:
-        ref_tree="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.{tree_type}",
-        bootstraps="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.bootstraps",
-    output:
-        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
-    log:
-        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support.log",
-    conda:
-        "../envs/gotree.yaml"
-    threads: 4
-    shell:
-        "( gotree compute support tbe "
-        "    --threads {threads} "
-        "    --bootstrap {input.bootstraps} "
-        "    --reftree {input.ref_tree} "
-        "    --out {output.support} "
-        ") 2>{log}"
-
-
 rule extract_ml_tree_likelihoods:
     input:
-        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log",
+        log="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{infix}.raxml.log",
     output:
-        tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.tsv",
+        tsv="results/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{infix}.raxml.log_likelihoods.tsv",
     log:
-        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.log_likelihoods.log",
+        "logs/raxml_ng/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{infix}.raxml.log_likelihoods.log",
     conda:
         "../envs/grep.yaml"
+    params:
+        search_string=lambda wc: "Bootstrap tree" if wc.infix == "bootstraps" else "ML tree search"
     shell:
-        '( grep "ML tree search #" {input.log} | '
-        r"sed -r -e 's/^.*ML tree search #([0-9]+), logLikelihood: (-[0-9]+.[0-9]+)$/\1\t\2/' | "
+        '( grep "{params.search_string} #" {input.log} | '
+        r"sed -r -e 's/^.*{params.search_string} #([0-9]+), logLikelihood: (-[0-9]+.[0-9]+)$/\1\t\2/' | "
         "sort -n -k 1,1 "
         ">{output.tsv} "
         ") 2>{log}"
@@ -399,6 +368,45 @@ rule cluster_info_dist_across_trees:
     threads: 1
     script:
         "../scripts/cluster_info_dist.R"
+
+
+rule gotree_compute_consensus_tree:
+    input:
+        best_cluster_trees="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.mlTrees.best_cluster.best_cluster_trees.newick",
+    output:
+        consensus_tree="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree",
+    log:
+        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.consensusTree.log",
+    conda:
+        "../envs/gotree.yaml"
+    threads: 4
+    shell:
+        "( gotree compute consensus "
+        "    --input {input.best_cluster_trees} "
+        "    --freq-min 0.5 " # this should be the default, but without a min frequency we get an error about this
+        "    --threads {threads} "
+        "    --output {output.consensus_tree} "
+        ") 2>{log}"
+
+
+rule gotree_support_collapsed_trees:
+    input:
+        ref_tree="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.search.raxml.collapsed.{tree_type}",
+        bootstraps="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.bootstraps.raxml.collapsed.bootstraps",
+    output:
+        support="results/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.collapsed.support",
+    log:
+        "logs/{software}/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support.log",
+    conda:
+        "../envs/gotree.yaml"
+    threads: 4
+    shell:
+        "( gotree compute support tbe "
+        "    --threads {threads} "
+        "    --bootstrap {input.bootstraps} "
+        "    --reftree {input.ref_tree} "
+        "    --out {output.support} "
+        ") 2>{log}"
 
 
 rule raxml_ng_rfdist_across_trees:
@@ -558,15 +566,15 @@ rule raxml_ng_bsconverge_to_tsv:
 rule concatenate_raxml_ng_tsvs_per_individual_per_metric:
     input:
         rf_dists=lambda wc: expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.raxml.{{metric}}.tsv",
+            "results/raxml_ng/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.raxml.{{metric}}.tsv",
             model=config["raxml_ng"]["models"],
             n_missing_cells=config["raxml_ng"]["max_missing"],
             type=["startTree", "mlTrees", "bootstraps"] if wc.metric == "rf_dist" else ["bootstraps"],
         ),
     output:
-        tsv="results/trees/{individual}.{metric}.{software}.max_missing_stable_topology_selection.tsv",
+        tsv="results/trees/{individual}.{metric}.max_missing_stable_topology_selection.tsv",
     log:
-        "logs/trees/{individual}.{metric}.{software}.max_missing_stable_topology_selection.log",
+        "logs/trees/{individual}.{metric}.max_missing_stable_topology_selection.log",
     conda:
         "../envs/xsv.yaml"
     shell:
@@ -581,11 +589,11 @@ rule concatenate_raxml_ng_tsvs_per_individual_per_metric:
 rule join_raxml_ng_tsvs_per_individual_across_metrics:
     input:
         bsconverge="results/trees/{individual}.bsconverge.raxml_ng.max_missing_stable_topology_selection.tsv",
-        rf_dist="results/trees/{individual}.rf_dist.{software}.max_missing_stable_topology_selection.tsv",
+        rf_dist="results/trees/{individual}.rf_dist.max_missing_stable_topology_selection.tsv",
     output:
-        tsv="results/trees/{individual}.{software}.max_missing_stable_topology_selection.tsv",
+        tsv="results/trees/{individual}.max_missing_stable_topology_selection.tsv",
     log:
-        "logs/trees/{individual}.{software}.max_missing_stable_topology_selection.join_metrics.log",
+        "logs/trees/{individual}.max_missing_stable_topology_selection.join_metrics.log",
     conda:
         "../envs/xsv.yaml"
     shell:
@@ -602,11 +610,11 @@ rule join_raxml_ng_tsvs_per_individual_across_metrics:
 
 rule plot_distinct_topologies_across_missingness:
     input:
-        tsv="results/trees/{individual}.{software}.max_missing_stable_topology_selection.tsv",
+        tsv="results/trees/{individual}.gotree.max_missing_stable_topology_selection.tsv",
     output:
-        plot="results/trees/{individual}.{software}.max_missing_stable_topology_selection.pdf",
+        plot="results/trees/{individual}.max_missing_stable_topology_selection.pdf",
     log:
-        "logs/trees/{individual}.{software}.max_missing_stable_topology_selection.log"
+        "logs/trees/{individual}.max_missing_stable_topology_selection.log"
     conda:
         "../envs/tidyverse.yaml"
     script:
@@ -615,12 +623,12 @@ rule plot_distinct_topologies_across_missingness:
 
 rule plot_support_tree:
     input:
-        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
+        support="results/gotree/{individual}/results/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.collapsed.support",
         samples=config["samples"],
     output:
-        support="results/trees/{individual}/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.{software}.support.{tree_type}.pdf",
+        support="results/trees/{individual}/{model}/max_{n_missing_cells}_missing/{individual}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.collapsed.pdf",
     log:
-        "logs/trees/{model}/max_{n_missing_cells}_missing/{individual}.{software}.support.{tree_type}.log",
+        "logs/trees/{model}/max_{n_missing_cells}_missing/{individual}.support.{tree_type}.collapsed.log",
     conda:
         "../envs/ggtree.yaml"
     script:
@@ -630,21 +638,21 @@ rule plot_support_tree:
 rule plot_values_across_missingness:
     input:
         support_trees=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.support",
+            "results/gotree/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.{tree_type}.raxml.collapsed.support",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
             tree_type=["bestTree", "consensusTree"]
         ),
         cluster_info_dist=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv",
+            "results/gotree/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.{type}.all.cluster_info_dist.tsv.gz",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
             type=["startTree", "mlTrees", "bootstraps"],
         )
     output:
-        support_plot="results/trees/{individual}.{software}.tree_values_across_missingness.pdf",
+        support_plot="results/trees/{individual}.tree_values_across_missingness.pdf",
     log:
-        "logs/trees/{individual}.{software}.tree_values_across_missingness_plot.log",
+        "logs/trees/{individual}.tree_values_across_missingness_plot.log",
     conda:
         "../envs/ggtree.yaml"
     resources:
@@ -656,7 +664,7 @@ rule plot_values_across_missingness:
 rule plot_support_values_and_branch_lengths:
     input:
         support_trees=expand(
-            "results/{{software}}/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.raxml.support",
+            "results/gotree/{{individual}}/results/{model}/max_{n_missing_cells}_missing/{{individual}}.{model}.max_{n_missing_cells}_missing.support.{{tree_type}}.raxml.collapsed.support",
             model=lookup("raxml_ng/models", within=config),
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
         ),
@@ -666,13 +674,13 @@ rule plot_support_values_and_branch_lengths:
             n_missing_cells=lookup(dpath="raxml_ng/max_missing", within=config),
         ),
     output:
-        support_hist="results/trees/{individual}.{software}.support.histogram.pdf",
-        branch_length_hist="results/trees/{individual}.{software}.branch_length.histogram.pdf",
-        branch_length_ecdf="results/trees/{individual}.{software}.branch_length.ecdf.pdf",
-        data_plot="results/trees/{individual}.{software}.support_vs_branch_length.full_data.pdf",
-        summary_plot="results/trees/{individual}.{software}.support_vs_branch_length.summary.pdf",
+        support_hist="results/trees/{individual}.{tree_type}.support.histogram.pdf",
+        branch_length_hist="results/trees/{individual}.{tree_type}.branch_length.histogram.pdf",
+        branch_length_ecdf="results/trees/{individual}.{tree_type}.branch_length.ecdf.pdf",
+        data_plot="results/trees/{individual}.{tree_type}.support_vs_branch_length.full_data.pdf",
+        summary_plot="results/trees/{individual}.{tree_type}.support_vs_branch_length.summary.pdf",
     log:
-        "logs/trees/{individual}.{software}.support_values_vs_branch_lengths.log",
+        "logs/trees/{individual}.{tree_type}.support_values_vs_branch_lengths.log",
     conda:
         "../envs/ggtree.yaml"
     script:
