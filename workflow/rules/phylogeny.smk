@@ -271,7 +271,7 @@ rule raxml_ng_bootstrap:
     params:
         prefix=get_raxml_ng_prefix,
 #    threads: get_raxml_ng_threads
-    threads: 32
+    threads: 16 # it can make sense to set this to --set-threads raxml_ng_bootstrap=1 for jobs that are failing, because parallel execution sometimes jumbles up the log file order that we need to parse out likelihoods downstream
     resources:
         mem_mb=get_raxml_ng_mem_mb,
         runtime=lambda wildcards, attempt: attempt * 60 * 22,
@@ -610,7 +610,7 @@ rule join_raxml_ng_tsvs_per_individual_across_metrics:
 
 rule plot_distinct_topologies_across_missingness:
     input:
-        tsv="results/trees/{individual}.gotree.max_missing_stable_topology_selection.tsv",
+        tsv="results/trees/{individual}.max_missing_stable_topology_selection.tsv",
     output:
         plot="results/trees/{individual}.max_missing_stable_topology_selection.pdf",
     log:
@@ -656,7 +656,7 @@ rule plot_values_across_missingness:
     conda:
         "../envs/ggtree.yaml"
     resources:
-        mem_mb=lambda wc, input: input.size_mb * 1.2
+        mem_mb=lambda wc, input: input.size_mb * 5
     script:
         "../scripts/plot_tree_values_across_missingness.R"
 
