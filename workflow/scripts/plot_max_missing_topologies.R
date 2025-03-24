@@ -83,11 +83,11 @@ rfs_and_topos <- read_tsv(
 plot <- ggplot(
   rfs_and_topos,
   aes(
-    x = model,
+    x = max_missing,
     y = value,
     color = `number of trees`,
-    shape = `information criteria scores`,
-    linetype = `trees from`
+    linetype = `information criteria scores`,
+    shape = `trees from`
   )
 ) +
   scale_color_brewer(
@@ -99,22 +99,11 @@ plot <- ggplot(
   ) +
   facet_grid(
     rows = vars(value_type),
-    cols = vars(factor(max_missing)),
+    cols = vars(factor(model)),
     scales = "free_y"
   ) +
   ylim(0,NA) +
-  theme_bw() +
-  theme(
-    # text = element_text(size=rel(5.5)),
-    # x-axis facet labels do not seem to inherit from text above
-    # strip.text.x = element_text(size=rel(5.5)),
-    axis.text.x = element_text(
-      angle=45,
-      vjust=0.9,
-      hjust=0.9
-    )
-  )
-
+  theme_bw()
 
 number_of_models <- rfs_and_topos |> distinct(model) |> count() |> pull(n)
 plot_width = 3 + number_of_models * 3.5
