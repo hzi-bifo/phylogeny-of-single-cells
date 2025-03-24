@@ -58,6 +58,58 @@ all_values <- bind_rows(
     cluster_info_dist
   )
 
+highest_mean_besttree_bootstrap_support = all_values |>
+  filter(
+    value_type == "bestTree bootstrap support"
+  ) |>
+  mutate(
+    full_model = str_c(
+      value_type,
+      max_missing,
+      model,
+      sep = "_"
+    )
+  ) |>
+  group_by(full_model) |>
+  summarise(mean = mean(value)) |>
+  slice_max(mean, n = 1) |>
+  pull(full_model)
+
+highest_mean_consensustree_bootstrap_support = all_values |>
+  filter(
+    value_type == "consensusTree bootstrap support"
+  ) |>
+  mutate(
+    full_model = str_c(
+      value_type,
+      max_missing,
+      model,
+      sep = "_"
+    )
+  ) |>
+  group_by(full_model) |>
+  summarise(mean = mean(value)) |>
+  slice_max(mean, n = 1) |>
+  pull(full_model)
+
+lowest_mean_mltrees_cluster_info_dist = all_values |>
+  filter(
+    value_type == "mlTrees cluster info dist"
+  ) |>
+  mutate(
+    full_model = str_c(
+      value_type,
+      max_missing,
+      model,
+      sep = "_"
+    )
+  ) |>
+  group_by(full_model) |>
+  summarise(mean = mean(value)) |>
+  slice_min(mean, n = 1) |>
+  pull(full_model)
+
+
 support_across_missingness <- ggplot(
     all_values,
     aes(
@@ -66,7 +118,31 @@ support_across_missingness <- ggplot(
     )
   ) + 
   geom_violin(
-    draw_quantiles = c(0.25, 0.5, 0.75)
+    draw_quantiles = c(0.25, 0.5, 0.75),
+    aes(
+      color=factor(
+        str_c(
+          value_type,
+          max_missing,
+          model,
+          sep="_"
+        )
+      )
+    )
+  ) +
+  scale_color_manual(
+    str_wrap(
+      "best model for respective value",
+      width = 12
+    ),
+    values = setNames(
+      c("blue", "blue", "blue"),
+      c(
+        highest_mean_besttree_bootstrap_support,
+        highest_mean_consensustree_bootstrap_support,
+        lowest_mean_mltrees_cluster_info_dist
+      )
+    )
   ) +
   stat_summary(
     fun.data="mean_se",
@@ -76,7 +152,7 @@ support_across_missingness <- ggplot(
     cols = vars(factor(max_missing)),
     rows = vars(factor(value_type))
   ) +
-  theme_bw() +
+theme_bw() +
   theme(
     # text = element_text(size=rel(5.5)),
     # x-axis facet labels do not seem to inherit from text above
